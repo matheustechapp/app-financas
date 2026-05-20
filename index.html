@@ -1024,7 +1024,7 @@ function _parseXlsx(file){
       const item=_parseRow(r[0],r[1],r[3],r[4],r[5],r[6],r[7],r[8],r[9]);
       if(item){data.push(item);count++;}
     });
-    save();sbBatchUpsert(data.slice(-count));render();showToast(`${count} registros importados!`);
+    save();showToast(`${count} registros importados!`);render();sbBatchUpsert(data.slice(-count));
   };
   reader.readAsArrayBuffer(file);
 }
@@ -1038,7 +1038,7 @@ function _parseCsv(text){
     const item=_parseRow(cols[0],cols[1],cols[3],cols[4],cols[5],cols[6],cols[7],cols[8],cols[9]);
     if(item){data.push(item);count++;}
   });
-  save();sbBatchUpsert(data.slice(-count));render();showToast(`${count} registros importados!`);
+  save();showToast(`${count} registros importados!`);render();sbBatchUpsert(data.slice(-count));
 }
 function clearAll(){if(!confirm('Apagar tudo?'))return;data=[];metas=[];recs=[];wsetup={};['fluxo_v3','fluxo_metas3','fluxo_recs3','fluxo_wsetup'].forEach(k=>localStorage.removeItem(k));render();showToast('Dados apagados');}
 function save(item=null){
@@ -1072,7 +1072,6 @@ async function syncFromServer(){
         localStorage.setItem('fluxo_v3',JSON.stringify(data));
       } else if(data.length>0){
         // servidor vazio mas local tem dados — envia para o servidor
-        showToast('Enviando dados para nuvem...');
         await sbBatchUpsert(data);
       }
     }
@@ -1156,13 +1155,18 @@ async function sbSaveRec(rec){
 
 // ── UPLOAD em lote (importação CSV/XLSX) ──────────────────
 async function sbBatchUpsert(items){
-  try{
-    const rows=items.map(toRow);
-    // Supabase aceita arrays — envia em chunks de 200
-    for(let i=0;i<rows.length;i+=200){
-      await fetch(sbUrl('lancamentos'),{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(rows.slice(i,i+200))});
-    }
-  }catch(e){console.warn('sbBatchUpsert offline',e);}
+  if(!items||!items.length)return;
+  const rows=items.map(toRow);
+  let enviados=0;
+  for(let i=0;i<rows.length;i+=200){
+    try{
+      const chunk=rows.slice(i,i+200);
+      const res=await fetch(sbUrl('lancamentos'),{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(chunk)});
+      if(!res.ok){const err=await res.text();console.error('sbBatchUpsert erro chunk',i,err);}
+      else{enviados+=chunk.length;showToast(`Enviando... ${enviados}/${rows.length}`);}
+    }catch(e){console.error('sbBatchUpsert falhou chunk',i,e);}
+  }
+  showToast(`${enviados} registros enviados!`);
 }
 
 // ── INIT ───────────────────────────────────────────────────
