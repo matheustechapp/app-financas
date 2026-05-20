@@ -990,13 +990,19 @@ function _parseRow(colA,colB,colD,colE,colF,colG,colH,colI,colJ){
   const valor=_toValor(colJ);
   if(!desc||!valor||isNaN(valor))return null;
   const dataLanc=_toDateStr(colA);
-  const lanDate=dataLanc?new Date(dataLanc):new Date();
-  const lanM=lanDate.getMonth(),lanY=lanDate.getFullYear()||curY;
+  // usa split para evitar bug de fuso horário do new Date() com strings yyyy-mm-dd
+  let lanM=curM,lanY=curY;
+  if(dataLanc){
+    const dp=dataLanc.split('-');
+    lanY=parseInt(dp[0]);
+    lanM=parseInt(dp[1])-1; // 0-based
+  }
   let fatM=lanM,fatY=lanY;
   const fatNum=parseInt(colB);
   if(!isNaN(fatNum)&&fatNum>=1&&fatNum<=12){
     fatM=fatNum-1;
-    fatY=(fatM<lanM)?lanY+1:lanY;
+    // fatura no mesmo ano se fatM >= lanM, senão é ano seguinte
+    fatY=(fatM>=lanM)?lanY:lanY+1;
   }
   const classif=String(colI||'').trim().toLowerCase();
   return {
