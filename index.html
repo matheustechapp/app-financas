@@ -1063,18 +1063,52 @@ function fromRow(r){return{id:r.id,tipo:r.tipo,desc:r.descricao,det:r.det||'',va
 async function syncFromServer(){
   try{
     showToast('Sincronizando...');
-    // lancamentos
+    // lancamentos — só sobrescreve se servidor tiver dados
     const r1=await fetch(sbUrl('lancamentos','?select=*&order=data_lanc.desc'),{headers:SB_H});
-    if(r1.ok){const rows=await r1.json();data=rows.map(fromRow);localStorage.setItem('fluxo_v3',JSON.stringify(data));}
+    if(r1.ok){
+      const rows=await r1.json();
+      if(rows.length>0){
+        data=rows.map(fromRow);
+        localStorage.setItem('fluxo_v3',JSON.stringify(data));
+      } else if(data.length>0){
+        // servidor vazio mas local tem dados — envia para o servidor
+        showToast('Enviando dados para nuvem...');
+        await sbBatchUpsert(data);
+      }
+    }
     // metas
     const r2=await fetch(sbUrl('metas','?select=*'),{headers:SB_H});
-    if(r2.ok){const rows=await r2.json();metas=rows.map(m=>({id:m.id,nome:m.nome,lim:parseFloat(m.lim),cat:m.cat,cor:m.cor,iniM:m.ini_m,iniY:m.ini_y,fimM:m.fim_m,fimY:m.fim_y}));localStorage.setItem('fluxo_metas3',JSON.stringify(metas));}
+    if(r2.ok){
+      const rows=await r2.json();
+      if(rows.length>0){
+        metas=rows.map(m=>({id:m.id,nome:m.nome,lim:parseFloat(m.lim),cat:m.cat,cor:m.cor,iniM:m.ini_m,iniY:m.ini_y,fimM:m.fim_m,fimY:m.fim_y}));
+        localStorage.setItem('fluxo_metas3',JSON.stringify(metas));
+      } else if(metas.length>0){
+        for(const m of metas) await sbSaveMeta(m);
+      }
+    }
     // recorrentes
     const r3=await fetch(sbUrl('recorrentes','?select=*'),{headers:SB_H});
-    if(r3.ok){const rows=await r3.json();recs=rows.map(r=>r.dados);localStorage.setItem('fluxo_recs3',JSON.stringify(recs));}
+    if(r3.ok){
+      const rows=await r3.json();
+      if(rows.length>0){
+        recs=rows.map(r=>r.dados);
+        localStorage.setItem('fluxo_recs3',JSON.stringify(recs));
+      } else if(recs.length>0){
+        for(const r of recs) await sbSaveRec(r);
+      }
+    }
     // wsetup
     const r4=await fetch(sbUrl('wsetup','?select=*'),{headers:SB_H});
-    if(r4.ok){const rows=await r4.json();rows.forEach(r=>{wsetup[r.chave]=r.dados;});localStorage.setItem('fluxo_wsetup',JSON.stringify(wsetup));}
+    if(r4.ok){
+      const rows=await r4.json();
+      if(rows.length>0){
+        rows.forEach(r=>{wsetup[r.chave]=r.dados;});
+        localStorage.setItem('fluxo_wsetup',JSON.stringify(wsetup));
+      } else if(Object.keys(wsetup).length>0){
+        for(const [k,v] of Object.entries(wsetup)) await sbSaveWsetup(k,v);
+      }
+    }
     applyRecs();render();
     showToast('Sincronizado!');
   }catch(err){
