@@ -346,6 +346,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Instrumen
   <div class="scroll">
     <div class="sett">
       <div class="sett-sec"><h3>Dados</h3>
+        <button class="exp-btn" onclick="syncFromServer()" style="color:var(--green)">↺ Sincronizar agora</button>
         <button class="exp-btn" onclick="exportCSV()">↓ Exportar CSV</button>
         <button class="exp-btn" onclick="document.getElementById('impInput').click()">↑ Importar CSV ou XLSX</button>
         <input type="file" id="impInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleImport(event)">
@@ -559,6 +560,7 @@ function saveWeekSetup(){
   wsetup[k].orcTransp=parseFloat(document.getElementById('wOrcTransp').value)||0;
   wsetup[k].orcMerc=parseFloat(document.getElementById('wOrcMerc').value)||0;
   localStorage.setItem('fluxo_wsetup',JSON.stringify(wsetup));
+  sbSaveWsetup(k,wsetup[k]);
   renderSemana();
 }
 
@@ -882,8 +884,9 @@ function salvar(){
     const rec={id:'r'+Date.now(),iniM:parseInt(ip[0]),iniY:parseInt(ip[1]),fimM:fpp?parseInt(fpp[0]):null,fimY:fpp?parseInt(fpp[1]):null,tpl:{...item,recId:'_'}};
     recs.push(rec);item.recId=rec.id;
     localStorage.setItem('fluxo_recs3',JSON.stringify(recs));
+    sbSaveRec(rec);
   }
-  save();closeModal();applyRecs();render();
+  save(item);closeModal();applyRecs();render();
   showToast(editId?'Atualizado!':'Salvo!');
 }
 
@@ -907,6 +910,7 @@ function salvarMeta(){
   const fp=document.getElementById('mFim').value.split('-');
   metas.push({id:Date.now().toString(),nome,lim,cat:document.getElementById('mCat').value,cor:curMetaCor,iniM:parseInt(ip[0]),iniY:parseInt(ip[1]),fimM:parseInt(fp[0]),fimY:parseInt(fp[1])});
   localStorage.setItem('fluxo_metas3',JSON.stringify(metas));
+  sbSaveMeta(metas[metas.length-1]);
   closeMetaModal();render();showToast('Meta criada!');
 }
 
@@ -1020,7 +1024,7 @@ function _parseXlsx(file){
       const item=_parseRow(r[0],r[1],r[3],r[4],r[5],r[6],r[7],r[8],r[9]);
       if(item){data.push(item);count++;}
     });
-    save();render();showToast(`${count} registros importados!`);
+    save();sbBatchUpsert(data.slice(-count));render();showToast(`${count} registros importados!`);
   };
   reader.readAsArrayBuffer(file);
 }
@@ -1034,14 +1038,101 @@ function _parseCsv(text){
     const item=_parseRow(cols[0],cols[1],cols[3],cols[4],cols[5],cols[6],cols[7],cols[8],cols[9]);
     if(item){data.push(item);count++;}
   });
-  save();render();showToast(`${count} registros importados!`);
+  save();sbBatchUpsert(data.slice(-count));render();showToast(`${count} registros importados!`);
 }
 function clearAll(){if(!confirm('Apagar tudo?'))return;data=[];metas=[];recs=[];wsetup={};['fluxo_v3','fluxo_metas3','fluxo_recs3','fluxo_wsetup'].forEach(k=>localStorage.removeItem(k));render();showToast('Dados apagados');}
-function save(){localStorage.setItem('fluxo_v3',JSON.stringify(data));}
+function save(item=null){
+  localStorage.setItem('fluxo_v3',JSON.stringify(data));
+  if(item) sbSaveItem(item);
+}
 let _tt;
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2500);}
 
-applyRecs();render();
+// ── SUPABASE CONFIG ───────────────────────────────────────
+const SB_URL='https://afobywgjbfihgdlwmgft.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb2J5d2dqYmZpaGdkbHdtZ2Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTM5NzksImV4cCI6MjA5NDgyOTk3OX0.er7FmRQA0xjrdIqG5XrYt0NK0MZiQuJySo4TgfWI0m4';
+const SB_H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+const sbUrl=(table,qs='')=>`${SB_URL}/rest/v1/${table}${qs}`;
+
+// converte item local → linha supabase
+function toRow(i){return{id:i.id,tipo:i.tipo,descricao:i.desc,det:i.det||'',valor:i.valor,data_lanc:i.dataLanc||'',lan_m:i.lanM,lan_y:i.lanY,fat_m:i.fatM,fat_y:i.fatY,cat:i.cat||'',pgto:i.pgto||'',resp:i.resp||'',rec_id:i.recId||null};}
+// converte linha supabase → item local
+function fromRow(r){return{id:r.id,tipo:r.tipo,desc:r.descricao,det:r.det||'',valor:parseFloat(r.valor),dataLanc:r.data_lanc||'',lanM:r.lan_m,lanY:r.lan_y,fatM:r.fat_m,fatY:r.fat_y,cat:r.cat||'',pgto:r.pgto||'',resp:r.resp||'',recId:r.rec_id||null};}
+
+// ── SYNC COMPLETO (pull do servidor) ──────────────────────
+async function syncFromServer(){
+  try{
+    showToast('Sincronizando...');
+    // lancamentos
+    const r1=await fetch(sbUrl('lancamentos','?select=*&order=data_lanc.desc'),{headers:SB_H});
+    if(r1.ok){const rows=await r1.json();data=rows.map(fromRow);localStorage.setItem('fluxo_v3',JSON.stringify(data));}
+    // metas
+    const r2=await fetch(sbUrl('metas','?select=*'),{headers:SB_H});
+    if(r2.ok){const rows=await r2.json();metas=rows.map(m=>({id:m.id,nome:m.nome,lim:parseFloat(m.lim),cat:m.cat,cor:m.cor,iniM:m.ini_m,iniY:m.ini_y,fimM:m.fim_m,fimY:m.fim_y}));localStorage.setItem('fluxo_metas3',JSON.stringify(metas));}
+    // recorrentes
+    const r3=await fetch(sbUrl('recorrentes','?select=*'),{headers:SB_H});
+    if(r3.ok){const rows=await r3.json();recs=rows.map(r=>r.dados);localStorage.setItem('fluxo_recs3',JSON.stringify(recs));}
+    // wsetup
+    const r4=await fetch(sbUrl('wsetup','?select=*'),{headers:SB_H});
+    if(r4.ok){const rows=await r4.json();rows.forEach(r=>{wsetup[r.chave]=r.dados;});localStorage.setItem('fluxo_wsetup',JSON.stringify(wsetup));}
+    applyRecs();render();
+    showToast('Sincronizado!');
+  }catch(err){
+    console.error('Sync error',err);
+    showToast('Offline — dados locais');
+    applyRecs();render();
+  }
+}
+
+// ── UPSERT lançamento ──────────────────────────────────────
+async function sbSaveItem(item){
+  try{
+    await fetch(sbUrl('lancamentos'),{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(toRow(item))});
+  }catch(e){console.warn('sbSaveItem offline',e);}
+}
+
+// ── DELETE lançamento ──────────────────────────────────────
+async function sbDeleteItem(id){
+  try{
+    await fetch(sbUrl('lancamentos',`?id=eq.${id}`),{method:'DELETE',headers:SB_H});
+  }catch(e){console.warn('sbDeleteItem offline',e);}
+}
+
+// ── UPSERT meta ────────────────────────────────────────────
+async function sbSaveMeta(m){
+  try{
+    const row={id:m.id,nome:m.nome,lim:m.lim,cat:m.cat,cor:m.cor,ini_m:m.iniM,ini_y:m.iniY,fim_m:m.fimM,fim_y:m.fimY};
+    await fetch(sbUrl('metas'),{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(row)});
+  }catch(e){console.warn('sbSaveMeta offline',e);}
+}
+
+// ── UPSERT wsetup ──────────────────────────────────────────
+async function sbSaveWsetup(chave,dados){
+  try{
+    await fetch(sbUrl('wsetup'),{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({chave,dados})});
+  }catch(e){console.warn('sbSaveWsetup offline',e);}
+}
+
+// ── UPSERT recorrente ──────────────────────────────────────
+async function sbSaveRec(rec){
+  try{
+    await fetch(sbUrl('recorrentes'),{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:rec.id,dados:rec})});
+  }catch(e){console.warn('sbSaveRec offline',e);}
+}
+
+// ── UPLOAD em lote (importação CSV/XLSX) ──────────────────
+async function sbBatchUpsert(items){
+  try{
+    const rows=items.map(toRow);
+    // Supabase aceita arrays — envia em chunks de 200
+    for(let i=0;i<rows.length;i+=200){
+      await fetch(sbUrl('lancamentos'),{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(rows.slice(i,i+200))});
+    }
+  }catch(e){console.warn('sbBatchUpsert offline',e);}
+}
+
+// ── INIT ───────────────────────────────────────────────────
+syncFromServer();
 </script>
 <script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
