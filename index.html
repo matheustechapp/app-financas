@@ -7,9 +7,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Fluxo">
+<meta name="apple-mobile-web-app-title" content="Finance Personal">
 <link rel="manifest" href="manifest.json">
-<title>Fluxo</title>
+<title>Finance Personal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -224,7 +224,40 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.lanc,.hist-month,.meta-card{animation:fu .2s ease both}
+.lanc,.hist-month,.meta-card,.cartao-card{animation:fu .2s ease both}
+
+/* DARK MODE */
+body.dark{
+  --bg:#0D1117;--bg2:#161B22;--bg3:#1C2130;--bg4:#242A3A;--bg5:#2A3245;
+  --b:rgba(255,255,255,0.06);--b2:rgba(255,255,255,0.10);--b3:rgba(255,255,255,0.16);
+  --t:#E6EDF3;--t2:#8B949E;--t3:#484F58;
+  --green:#3FB950;--gbg:rgba(63,185,80,0.12);
+  --red:#F85149;--rbg:rgba(248,81,73,0.12);
+  --blue:#58A6FF;--bbg:rgba(88,166,255,0.12);
+  --amber:#D29922;--abg:rgba(210,153,34,0.12);
+  --shadow:0 2px 12px rgba(0,0,0,0.3);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.4);
+}
+body.dark .hero{background:linear-gradient(135deg,#1a2a6c,#2d4a9e)}
+body.dark .topbar{background:var(--bg2)}
+body.dark .bnav{background:rgba(13,17,23,0.96)}
+body.dark .modal{background:var(--bg2)}
+body.dark .mbg{background:rgba(0,0,0,0.8)}
+
+/* CARTOES */
+.cartao-card{background:var(--bg2);border-radius:var(--r);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
+.cartao-header{padding:16px 18px;display:flex;align-items:center;justify-content:space-between}
+.cartao-nome{font-size:15px;font-weight:800;font-family:'Manrope',sans-serif;letter-spacing:-.3px}
+.cartao-total{font-size:18px;font-weight:800;font-family:'Manrope',sans-serif;color:var(--red)}
+.cartao-bar-wrap{height:4px;background:var(--bg3);margin:0 18px 12px}
+.cartao-bar{height:100%;border-radius:2px;transition:width .5s}
+.cartao-items{border-top:1px solid var(--b);padding:4px 0}
+.cartao-item{display:flex;justify-content:space-between;align-items:center;padding:9px 18px;border-bottom:1px solid var(--b)}
+.cartao-item:last-child{border-bottom:none}
+.cartao-item-desc{font-size:12px;font-weight:500;color:var(--t);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:8px}
+.cartao-item-cat{font-size:10px;color:var(--t3);margin-top:1px}
+.cartao-item-val{font-size:12px;font-weight:700;color:var(--red);font-family:'Manrope',sans-serif;flex-shrink:0}
+.cartao-ver-mais{width:100%;background:none;border:none;color:var(--blue);font-size:12px;font-weight:600;padding:10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
 </style>
 </head>
 <body>
@@ -235,7 +268,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
     <div style="width:56px;height:56px;background:var(--blue);border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 8px 24px rgba(59,108,244,0.35)">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     </div>
-    <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:800;margin-bottom:4px;letter-spacing:-.8px;color:var(--t)">fluxo</div>
+    <div style="font-family:'Manrope',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.8px;color:var(--t)">Finance Personal</div>
     <div style="font-size:11px;color:var(--t3);letter-spacing:2.5px;margin-bottom:44px;font-weight:700">CONTROLE FINANCEIRO</div>
     <div style="width:100%;max-width:340px;background:var(--bg2);border-radius:20px;padding:24px;box-shadow:var(--shadow-lg)">
       <div class="field"><label>E-mail</label><input type="email" id="loginEmail" placeholder="seu@email.com" autocomplete="email"></div>
@@ -243,7 +276,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
       <div id="loginErr" style="font-size:12px;color:var(--red);text-align:center;margin-bottom:12px;display:none;font-weight:600"></div>
       <button onclick="doLogin()" style="width:100%;background:var(--blue);border:none;border-radius:var(--r);padding:14px;font-size:14px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(59,108,244,0.35)" id="loginBtn">Entrar</button>
     </div>
-    <div style="font-size:10px;color:var(--t3);position:absolute;bottom:32px;font-weight:600;letter-spacing:.5px">fluxo v3.0 · dados protegidos</div>
+    <div style="font-size:10px;color:var(--t3);position:absolute;bottom:32px;font-weight:600;letter-spacing:.5px">Finance Personal v3.0</div>
   </div>
 </div>
 
@@ -255,8 +288,11 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
       <span class="ml" id="mlHome">–</span>
       <button onclick="chM(1)">›</button>
     </div>
-    <div class="t-title">fluxo</div>
-    <div style="width:56px;text-align:right;font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace" id="lcount"></div>
+    <div class="t-title">Finance Personal</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="lcount" style="font-size:10px;color:var(--t3)"></span>
+      <button onclick="toggleTheme()" id="themeBtn" style="background:var(--bg3);border:1px solid var(--b2);border-radius:50px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--t2);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">🌙</button>
+    </div>
   </div>
   <div class="scroll">
     <div class="hero">
@@ -296,7 +332,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
 <!-- SEMANA -->
 <div class="screen" id="screen-semana">
   <div class="topbar">
-    <div class="t-title">semana</div>
+    <div class="t-title">Semana</div>
     <div class="mnav">
       <button onclick="chM(-1)">‹</button>
       <span class="ml" id="mlSemana">–</span>
@@ -360,7 +396,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
 
 <!-- HISTORICO -->
 <div class="screen" id="screen-hist">
-  <div class="topbar"><div class="t-title">histórico</div></div>
+  <div class="topbar"><div class="t-title">Histórico</div></div>
   <div class="scroll">
     <div class="sec">
       <div class="slabel" style="margin-bottom:12px">maiores gastos — todos os meses</div>
@@ -376,7 +412,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
 <!-- METAS -->
 <div class="screen" id="screen-metas">
   <div class="topbar">
-    <div class="t-title">metas</div>
+    <div class="t-title">Metas</div>
     <div class="mnav">
       <button onclick="chM(-1)">‹</button>
       <span class="ml" id="mlMetas">–</span>
@@ -388,9 +424,24 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
   </div>
 </div>
 
+<!-- CARTOES -->
+<div class="screen" id="screen-cartoes">
+  <div class="topbar">
+    <div class="t-title">Cartões</div>
+    <div class="mnav">
+      <button onclick="chM(-1)">‹</button>
+      <span class="ml" id="mlCartoes">–</span>
+      <button onclick="chM(1)">›</button>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="sec" id="cartoesEl"></div>
+  </div>
+</div>
+
 <!-- CONFIG -->
 <div class="screen" id="screen-cfg">
-  <div class="topbar"><div class="t-title">configurações</div></div>
+  <div class="topbar"><div class="t-title">Configurações</div></div>
   <div class="scroll">
     <div class="sett">
       <div class="sett-sec"><h3>Dados</h3>
@@ -405,7 +456,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
         <button class="exp-btn" onclick="doLogout()" style="color:var(--amber)">Sair da conta</button>
       </div>
       <div class="sett-sec"><h3>Perigo</h3><button class="danger-btn" onclick="clearAll()">Apagar todos os dados</button></div>
-      <div style="text-align:center;padding:14px 0;font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace">fluxo v3.0 · dados locais</div>
+      <div style="text-align:center;padding:14px 0;font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace">Finance Personal v3.0</div>
     </div>
   </div>
 </div>
@@ -427,6 +478,10 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
   <button class="nbtn" id="nav-metas" onclick="goTo('metas')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/></svg>
     <span>Metas</span>
+  </button>
+  <button class="nbtn" id="nav-cartoes" onclick="goTo('cartoes')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    <span>Cartões</span>
   </button>
   <button class="nbtn" id="nav-cfg" onclick="goTo('cfg')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -457,7 +512,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
     <div class="fr2">
       <div class="field"><label>Categoria</label><select id="fCat"></select></div>
       <div class="field"><label>Forma Pgto.</label>
-        <select id="fPgto"><option>C6</option><option>Inter</option><option>XP</option><option>TAP</option><option>Nubank</option></select>
+        <select id="fPgto"><option value="C6">Cartão C6 Bank</option><option value="Inter">Cartão Inter</option><option value="XP">Cartão XP</option><option value="TAP">Cartão Azul Platinum</option><option value="Nubank">Cartão Nubank</option></select>
       </div>
     </div>
     <div class="field"><label>Responsável</label>
@@ -584,7 +639,7 @@ function renderList(items){
         <div class="ldesc">${item.desc}</div>
         <div class="ltags">
           <span class="tag">${item.cat}</span>
-          ${item.pgto?`<span class="tag">${item.pgto}</span>`:''}
+          ${item.pgto?`<span class="tag">${CARD_NAMES[item.pgto]||item.pgto}</span>`:''}
           ${item.resp?`<span class="tag">${item.resp}</span>`:''}
           ${fd?`<span class="tag fat">fat.${MS[item.fatM].slice(0,3)}</span>`:''}
           ${item.recId?`<span class="tag rec">↺</span>`:''}
@@ -836,12 +891,16 @@ function goTo(s){
   document.getElementById('screen-'+s).classList.add('active');
   document.getElementById('nav-'+s)?.classList.add('active');
   document.getElementById('fab').style.display=(s==='home'?'flex':'none');
-  render();
+  if(s==='cartoes')renderCartoes();
+  else render();
 }
 
 function chM(d){
   curM+=d;if(curM>11){curM=0;curY++;}if(curM<0){curM=11;curY--;}
-  applyRecs();render();
+  applyRecs();
+  const activeScreen=document.querySelector('.screen.active')?.id;
+  if(activeScreen==='screen-cartoes')renderCartoes();
+  else render();
 }
 
 // ── RECORRENTES ────────────────────────────────────────────
@@ -1103,6 +1162,66 @@ function _parseCsv(text){
   save();showToast(`${count} registros importados!`);render();sbBatchUpsert(data.slice(-count));
 }
 function clearAll(){if(!confirm('Apagar tudo?'))return;data=[];metas=[];recs=[];wsetup={};['fluxo_v3','fluxo_metas3','fluxo_recs3','fluxo_wsetup'].forEach(k=>localStorage.removeItem(k));render();showToast('Dados apagados');}
+// ── THEME ──────────────────────────────────────────────────
+const CARD_NAMES={'C6':'Cartão C6 Bank','Inter':'Cartão Inter','XP':'Cartão XP','TAP':'Cartão Azul Platinum','Nubank':'Cartão Nubank'};
+const CARD_COLORS={'C6':'#F7B731','Inter':'#FF6B35','XP':'#1A1A2E','TAP':'#0066CC','Nubank':'#8A05BE'};
+
+function toggleTheme(){
+  document.body.classList.toggle('dark');
+  const isDark=document.body.classList.contains('dark');
+  localStorage.setItem('fp_theme',isDark?'dark':'light');
+  document.getElementById('themeBtn').textContent=isDark?'☀️':'🌙';
+  document.querySelector('meta[name="theme-color"]').content=isDark?'#0D1117':'#ffffff';
+}
+
+// ── CARTOES ────────────────────────────────────────────────
+function renderCartoes(){
+  const mlEl=document.getElementById('mlCartoes');
+  if(mlEl)mlEl.textContent=mStr(curM,curY);
+  const items=getItems().filter(i=>i.tipo==='saida');
+  const byCard={};
+  items.forEach(i=>{
+    const k=i.pgto||'Outros';
+    if(!byCard[k])byCard[k]=[];
+    byCard[k].push(i);
+  });
+  const sorted=Object.entries(byCard).sort((a,b)=>
+    b[1].reduce((s,i)=>s+i.valor,0)-a[1].reduce((s,i)=>s+i.valor,0)
+  );
+  const maxTotal=sorted[0]?sorted[0][1].reduce((s,i)=>s+i.valor,0):1;
+  const el=document.getElementById('cartoesEl');
+  if(!sorted.length){el.innerHTML='<div class="empty" style="padding:40px 0">Nenhum lançamento no mês</div>';return;}
+  el.innerHTML=sorted.map(([card,lancamentos],idx)=>{
+    const total=lancamentos.reduce((s,i)=>s+i.valor,0);
+    const pct=Math.round(total/maxTotal*100);
+    const cor=CARD_COLORS[card]||'var(--blue)';
+    const nome=CARD_NAMES[card]||card;
+    const sortedL=[...lancamentos].sort((a,b)=>b.valor-a.valor);
+    const top5=sortedL.slice(0,5);
+    const resto=sortedL.slice(5);
+    return `<div class="cartao-card" style="animation-delay:${idx*60}ms">
+      <div class="cartao-header">
+        <div>
+          <div class="cartao-nome" style="color:${cor}">${nome}</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px;font-weight:600">${lancamentos.length} lançamentos</div>
+        </div>
+        <div class="cartao-total">${fmt(total)}</div>
+      </div>
+      <div class="cartao-bar-wrap"><div class="cartao-bar" style="width:${pct}%;background:${cor}"></div></div>
+      <div class="cartao-items">
+        ${top5.map(i=>`<div class="cartao-item">
+          <div><div class="cartao-item-desc">${i.desc}</div><div class="cartao-item-cat">${i.cat}</div></div>
+          <div class="cartao-item-val">${fmt(i.valor)}</div>
+        </div>`).join('')}
+        ${resto.length?`<button class="cartao-ver-mais" onclick="this.previousElementSibling && this.style.display='none'" 
+          onclick="toggleCartaoResto(this,${JSON.stringify(resto.map(i=>({desc:i.desc,cat:i.cat,valor:i.valor})))})">
+          +${resto.length} lançamentos
+        </button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function save(item=null){
   localStorage.setItem('fluxo_v3',JSON.stringify(data));
   if(item) sbSaveItem(item);
@@ -1278,6 +1397,10 @@ async function doLogout(){
 }
 
 // ── INIT ───────────────────────────────────────────────────
+// restaura tema
+const savedTheme=localStorage.getItem('fp_theme');
+if(savedTheme==='dark'){document.body.classList.add('dark');const tb=document.getElementById('themeBtn');if(tb)tb.textContent='☀️';}
+
 // tenta restaurar sessão salva
 (async()=>{
   const savedToken=localStorage.getItem('fluxo_token');
