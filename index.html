@@ -87,10 +87,27 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
 .bar-val{font-size:10px;color:var(--t3);font-weight:600;flex-shrink:0;min-width:56px;text-align:right}
 
 /* FILTER */
-.frow{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px}
+.frow{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:8px}
 .frow::-webkit-scrollbar{display:none}
 .fbtn{flex-shrink:0;padding:6px 14px;border-radius:50px;border:1.5px solid var(--b2);background:var(--bg2);font-size:11px;font-weight:700;color:var(--t3);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:.3px;transition:all .15s;box-shadow:var(--shadow)}
 .fbtn.active{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(59,108,244,0.3)}
+/* ADVANCED FILTERS */
+.filter-bar{background:var(--bg2);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--b)}
+.filter-search{display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:var(--rs);padding:8px 12px;margin-bottom:10px;border:1.5px solid transparent;transition:border-color .15s}
+.filter-search:focus-within{border-color:var(--blue);background:var(--bg2)}
+.filter-search svg{flex-shrink:0;color:var(--t3)}
+.filter-search input{flex:1;background:none;border:none;outline:none;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;color:var(--t);font-weight:500}
+.filter-search input::placeholder{color:var(--t3)}
+.filter-selects{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.filter-select-wrap{position:relative}
+.filter-select-wrap select{width:100%;background:var(--bg3);border:1.5px solid var(--b);border-radius:var(--rs);padding:7px 28px 7px 10px;font-size:11px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;color:var(--t2);outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;transition:border-color .15s}
+.filter-select-wrap select:focus{border-color:var(--blue)}
+.filter-select-wrap::after{content:'▾';position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--t3);pointer-events:none}
+.filter-active-count{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:var(--blue);color:#fff;border-radius:50%;font-size:9px;font-weight:700;margin-left:4px}
+.filter-clear{background:none;border:none;color:var(--blue);font-size:11px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;padding:2px 6px;border-radius:6px}
+.filter-clear:active{background:var(--bbg)}
+.list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.list-count{font-size:11px;color:var(--t3);font-weight:600}
 
 /* LIST */
 .lanc{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--b)}
@@ -318,11 +335,49 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
       </div>
     </div>
     <div class="sec" style="padding-top:14px">
-      <div class="slabel">lançamentos</div>
+      <div class="list-header">
+        <div class="slabel" style="margin-bottom:0">lançamentos</div>
+        <span class="list-count" id="listCount"></span>
+      </div>
       <div class="frow">
         <button class="fbtn active" onclick="setF('todos',this)">Todos</button>
         <button class="fbtn" onclick="setF('entrada',this)">Entradas</button>
         <button class="fbtn" onclick="setF('saida',this)">Saídas</button>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="filterSearch" placeholder="Buscar por descrição..." oninput="applyFilters()">
+        </div>
+        <div class="filter-selects">
+          <div class="filter-select-wrap">
+            <select id="filterCat" onchange="applyFilters()">
+              <option value="">Categoria</option>
+            </select>
+          </div>
+          <div class="filter-select-wrap">
+            <select id="filterCartao" onchange="applyFilters()">
+              <option value="">Cartão</option>
+              <option value="C6">Cartão C6 Bank</option>
+              <option value="Inter">Cartão Inter</option>
+              <option value="XP">Cartão XP</option>
+              <option value="TAP">Cartão Azul Platinum</option>
+              <option value="Nubank">Cartão Nubank</option>
+            </select>
+          </div>
+          <div class="filter-select-wrap">
+            <select id="filterResp" onchange="applyFilters()">
+              <option value="">Forma Pgt.</option>
+              <option value="Crédito">Crédito</option>
+              <option value="Débito">Débito</option>
+              <option value="Adicional">Adicional</option>
+              <option value="Família Brenda">Família Brenda</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:flex-end">
+            <button class="filter-clear" onclick="clearFilters()" id="clearFiltersBtn" style="display:none">✕ Limpar</button>
+          </div>
+        </div>
       </div>
       <div id="listEl"></div>
     </div>
@@ -578,6 +633,7 @@ let recs=JSON.parse(localStorage.getItem('fluxo_recs3')||'[]');
 let wsetup=JSON.parse(localStorage.getItem('fluxo_wsetup')||'{}');
 let curM=new Date().getMonth(),curY=new Date().getFullYear();
 let curFilter='todos',curTipo='saida',curMetaCor=PAL[0];
+let fSearch='',fCat='',fCartao='',fResp='';
 
 const fmt=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const fmtD=s=>{if(!s)return'';const p=s.split('-');return`${p[2]}/${p[1]}`};
@@ -628,9 +684,28 @@ function renderChart(items){
 // ── LIST ───────────────────────────────────────────────────
 function renderList(items){
   const IC={'Alimentação - Necessidade':'🍽','Alimentação - Saídas':'🍔','Mercantil':'🛒','Saúde':'💊','Assinaturas':'📱','Impostos':'🏛','Custo fixo':'🔒','Carro - Transporte':'🚗','Casa':'🏠','Presentes':'🎁','Viagem':'✈️','Estudos/Capacitação':'📚','Gastos Extras':'💸','Gastos dos Outros':'👥','Compras Pessoais':'🛍','Comunidade':'🤝','Maria Áurea':'👶','Doce Áurea':'🍫','Salário':'💼','Freelance':'💻','Investimentos':'📈','Fatura':'💳','Reembolso':'↩️','Anuidade':'🔖','Outros':'📌'};
-  const fil=(curFilter==='todos'?items:items.filter(i=>i.tipo===curFilter)).sort((a,b)=>new Date(b.dataLanc||0)-new Date(a.dataLanc||0));
+  // populate category filter options
+  const catSel=document.getElementById('filterCat');
+  if(catSel){
+    const usedCats=[...new Set(items.map(i=>i.cat).filter(Boolean))].sort();
+    const curCatVal=catSel.value;
+    catSel.innerHTML='<option value="">Categoria</option>'+usedCats.map(c=>`<option value="${c}"${c===curCatVal?' selected':''}>${c}</option>`).join('');
+  }
+  let fil=(curFilter==='todos'?items:items.filter(i=>i.tipo===curFilter));
+  // apply advanced filters
+  if(fSearch)fil=fil.filter(i=>i.desc&&i.desc.toLowerCase().includes(fSearch.toLowerCase()));
+  if(fCat)fil=fil.filter(i=>i.cat===fCat);
+  if(fCartao)fil=fil.filter(i=>i.pgto===fCartao);
+  if(fResp)fil=fil.filter(i=>i.resp===fResp);
+  fil=fil.sort((a,b)=>new Date(b.dataLanc||0)-new Date(a.dataLanc||0));
+  // update count and clear button
+  const countEl=document.getElementById('listCount');
+  if(countEl)countEl.textContent=fil.length+' registro'+(fil.length!==1?'s':'');
+  const hasFilters=fSearch||fCat||fCartao||fResp;
+  const clearBtn=document.getElementById('clearFiltersBtn');
+  if(clearBtn)clearBtn.style.display=hasFilters?'inline-flex':'none';
   const el=document.getElementById('listEl');
-  if(!fil.length){el.innerHTML='<div class="empty">Nenhum lançamento</div>';return;}
+  if(!fil.length){el.innerHTML=`<div class="empty">${hasFilters?'Nenhum resultado para os filtros':'Nenhum lançamento'}</div>`;return;}
   el.innerHTML=fil.map((item,idx)=>{
     const fd=item.fatM!==item.lanM||item.fatY!==item.lanY;
     return `<div class="lanc" style="animation-delay:${idx*12}ms" onclick="editItem('${item.id}')">
@@ -1026,6 +1101,21 @@ function salvarMeta(){
 
 // ── FILTER ─────────────────────────────────────────────────
 function setF(f,btn){curFilter=f;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render();}
+function applyFilters(){
+  fSearch=document.getElementById('filterSearch')?.value||'';
+  fCat=document.getElementById('filterCat')?.value||'';
+  fCartao=document.getElementById('filterCartao')?.value||'';
+  fResp=document.getElementById('filterResp')?.value||'';
+  renderList(getItems());
+}
+function clearFilters(){
+  fSearch='';fCat='';fCartao='';fResp='';
+  const fs=document.getElementById('filterSearch');if(fs)fs.value='';
+  const fc=document.getElementById('filterCat');if(fc)fc.value='';
+  const fca=document.getElementById('filterCartao');if(fca)fca.value='';
+  const fr=document.getElementById('filterResp');if(fr)fr.value='';
+  renderList(getItems());
+}
 
 // ── EXPORT / IMPORT ────────────────────────────────────────
 function exportCSV(){
