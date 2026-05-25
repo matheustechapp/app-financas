@@ -1561,6 +1561,7 @@ function renderPessoas(){
           ${totalGrupo>0?`<div class="grupo-total">${fmt(totalGrupo)}</div>`:'<div style="font-size:11px;color:var(--green);font-weight:700">Quitado</div>'}
           ${grupo.cobrarGrupo&&totalGrupo>0?`<button onclick="openReceberGrupoModal('${grupo.id}','${grupo.nome}',${totalGrupo})" style="background:var(--green);border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:#fff;cursor:pointer">↓ Receber</button>`:''}
           <button onclick="openGrupoModal('${grupo.id}')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px;padding:2px">✏️</button>
+          <button onclick="deletarGrupo('${grupo.id}','${grupo.nome}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:2px">🗑</button>
         </div>
       </div>
       ${pessoasHtml||'<div style="font-size:12px;color:var(--t3);padding:8px 0">Nenhum gasto pendente este mês</div>'}
@@ -1599,8 +1600,8 @@ function renderGrupoPessoas(){
   document.getElementById('gPessoasList').innerHTML=gTempPessoas.map((p,i)=>`
     <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:var(--rs);padding:8px 12px;margin-bottom:6px">
       <span style="font-size:13px;font-weight:500">${p.nome}</span>
-      <button onclick="removePessoaFromGrupo(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">×</button>
-    </div>`).join('');
+      <button onclick="removePessoaFromGrupo(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;font-weight:700">× Remover</button>
+    </div>`).join('') || '<div style="font-size:12px;color:var(--t3);padding:6px 0">Nenhuma pessoa adicionada</div>';
 }
 function addPessoaToGrupo(){
   const nome=document.getElementById('gNovaPessoa').value.trim();
@@ -1612,6 +1613,14 @@ function addPessoaToGrupo(){
 function removePessoaFromGrupo(idx){
   gTempPessoas.splice(idx,1);
   renderGrupoPessoas();
+}
+function deletarGrupo(grupoId, grupoNome){
+  if(!confirm(`Excluir o grupo "${grupoNome}"? Os lançamentos vinculados não serão apagados.`))return;
+  grupos=grupos.filter(g=>g.id!==grupoId);
+  saveGrupos();
+  renderPessoas();
+  populatePessoaSelect();
+  showToast('Grupo excluído');
 }
 function closeGrupoModal(){document.getElementById('mbgGrupo').classList.remove('open');}
 function closeGrupoBg(e){if(e.target===document.getElementById('mbgGrupo'))closeGrupoModal();}
