@@ -707,6 +707,27 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
 
 <div class="toast" id="toast"></div>
 
+<!-- MODAL APORTE -->
+<div class="mbg" id="mbgAporte" onclick="if(event.target===this)closeAporteModal()">
+  <div class="modal">
+    <div class="m-handle"></div>
+    <div class="m-title">Registrar Aporte</div>
+    <div style="background:var(--bg3);border-radius:var(--rs);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--t2)">
+      Meta: <strong id="aporteMetaNome" style="color:var(--t)"></strong>
+    </div>
+    <div class="fr2">
+      <div class="field"><label>Valor (R$)</label><input type="number" id="aValor" placeholder="0,00" inputmode="decimal"></div>
+      <div class="field"><label>Data</label><input type="date" id="aData"></div>
+    </div>
+    <div class="field"><label>Observação (opcional)</label><input type="text" id="aObs" placeholder="Ex: Transferência, investimento..."></div>
+    <input type="hidden" id="aMetaId">
+    <div class="m-actions">
+      <button class="btn-c" onclick="closeAporteModal()">Cancelar</button>
+      <button class="btn-s" onclick="salvarAporte()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL GRUPO/PESSOA -->
 <div class="mbg" id="mbgGrupo" onclick="closeGrupoBg(event)">
   <div class="modal">
@@ -1117,44 +1138,60 @@ function renderMetas(){
         </div>
       </div>`;
     } else {
-      // economia: conta meses no período e calcula acumulado
+      // economia: acumulado vem dos aportes manuais registrados
       const mesesNoPeriodo=[];
       let y=iniY,mo=iniM;
       while(y*100+mo<=fimKey){mesesNoPeriodo.push({m:mo,y});mo++;if(mo>11){mo=0;y++;}}
       const totalMeses=mesesNoPeriodo.length;
-      // meses já passados (incluindo atual) dentro do período
-      const mesesPassados=mesesNoPeriodo.filter(x=>x.y*100+x.m<=curKey).length;
       const porMes=m.porMes||0;
       const totalObj=m.totalObj||(porMes*totalMeses);
-      const acumulado=Math.min(mesesPassados*porMes,totalObj);
+      // aportes registrados manualmente para esta meta
+      const aportesDA=aportes.filter(a=>a.metaId===m.id);
+      const acumulado=aportesDA.reduce((s,a)=>s+a.valor,0);
       const pct=totalObj>0?Math.min(acumulado/totalObj*100,100):0;
       const cor=m.cor||'var(--blue)';
+      const aportesHtml=aportesDA.length?`<div style="margin-top:8px;background:var(--gbg);border-radius:8px;padding:8px 10px">
+        <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:1px;margin-bottom:6px">APORTES REGISTRADOS</div>
+        ${aportesDA.sort((a,b)=>new Date(b.data)-new Date(a.data)).map(a=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.05)">
+            <div>
+              <span style="font-size:12px;font-weight:500;color:var(--t)">${a.obs||'Aporte'}</span>
+              <span style="font-size:10px;color:var(--t3);margin-left:6px">${fmtD(a.data)}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;font-weight:700;color:var(--green);font-family:'Manrope',sans-serif">+${fmt(a.valor)}</span>
+              <button onclick="deletarAporte('${a.id}')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px">🗑</button>
+            </div>
+          </div>`).join('')}
+      </div>`:'';
       return `<div class="meta-card">
         <div class="meta-tipo-badge meta-tipo-econ">💰 Meta de economia</div>
         <div class="meta-head"><span class="meta-name">${m.nome}</span><span class="meta-vals">${fmt(acumulado)} / ${fmt(totalObj)}</span></div>
         <div class="meta-track"><div class="meta-fill" style="width:${pct}%;background:${cor}"></div></div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:8px;margin-bottom:4px">
           <div style="text-align:center;background:var(--bg3);border-radius:6px;padding:6px 4px">
-            <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px">POR MÊS</div>
+            <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px">META/MÊS</div>
             <div style="font-size:12px;font-weight:700;color:var(--t);font-family:'Manrope',sans-serif">${fmt(porMes)}</div>
           </div>
           <div style="text-align:center;background:var(--bg3);border-radius:6px;padding:6px 4px">
-            <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px">MESES</div>
-            <div style="font-size:12px;font-weight:700;color:var(--t);font-family:'Manrope',sans-serif">${mesesPassados}/${totalMeses}</div>
+            <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px">APORTES</div>
+            <div style="font-size:12px;font-weight:700;color:var(--t);font-family:'Manrope',sans-serif">${aportesDA.length}</div>
           </div>
           <div style="text-align:center;background:var(--bg3);border-radius:6px;padding:6px 4px">
             <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px">FALTA</div>
             <div style="font-size:12px;font-weight:700;color:${cor};font-family:'Manrope',sans-serif">${fmt(Math.max(0,totalObj-acumulado))}</div>
           </div>
         </div>
-        <div class="meta-footer">
+        ${aportesHtml}
+        <div class="meta-footer" style="margin-top:8px">
           <span class="meta-pct" style="color:${cor}">${Math.round(pct)}% do objetivo</span>
-          <span class="meta-period">${periodo}</span>
+          <span class="meta-period">${periodo} · ${totalMeses} ${totalMeses===1?'mês':'meses'}</span>
         </div>
-        ${!isAtiva?`<div style="font-size:10px;color:var(--t3);margin-top:4px">${curKey<iniKey?'Ainda não iniciada':'Concluída 🎉'}</div>`:''}
+        ${!isAtiva?`<div style="font-size:10px;color:${pct>=100?'var(--green)':'var(--t3)'};margin-top:4px">${curKey<iniKey?'Ainda não iniciada':pct>=100?'🎉 Objetivo alcançado!':'Encerrada'}</div>`:''}
         <div class="meta-actions">
-          <button class="meta-btn edit" onclick="openMetaModal('${m.id}')">✏️ Editar</button>
-          <button class="meta-btn del" onclick="deletarMeta('${m.id}','${m.nome}')">🗑 Excluir</button>
+          <button class="meta-btn" onclick="openAporteModal('${m.id}','${m.nome}')" style="color:var(--green);border-color:var(--green)">+ Registrar aporte</button>
+          <button class="meta-btn edit" onclick="openMetaModal('${m.id}')">✏️</button>
+          <button class="meta-btn del" onclick="deletarMeta('${m.id}','${m.nome}')">🗑</button>
         </div>
       </div>`;
     }
@@ -1376,6 +1413,41 @@ function salvarMeta(){
   closeMetaModal();render();showToast(editId?'Meta atualizada!':'Meta criada!');
 }
 
+function openAporteModal(metaId,metaNome){
+  document.getElementById('aMetaId').value=metaId;
+  document.getElementById('aporteMetaNome').textContent=metaNome;
+  document.getElementById('aValor').value='';
+  document.getElementById('aData').value=new Date().toISOString().split('T')[0];
+  document.getElementById('aObs').value='';
+  document.getElementById('mbgAporte').classList.add('open');
+}
+function closeAporteModal(){document.getElementById('mbgAporte').classList.remove('open');}
+
+function salvarAporte(){
+  const metaId=document.getElementById('aMetaId').value;
+  const valor=parseFloat(document.getElementById('aValor').value);
+  if(!valor||valor<=0){showToast('Informe o valor do aporte');return;}
+  aportes.push({
+    id:'ap'+Date.now(),
+    metaId,
+    valor,
+    data:document.getElementById('aData').value,
+    obs:document.getElementById('aObs').value.trim()
+  });
+  saveAportes();
+  closeAporteModal();
+  render();
+  showToast('Aporte registrado!');
+}
+
+function deletarAporte(id){
+  if(!confirm('Excluir este aporte?'))return;
+  aportes=aportes.filter(a=>a.id!==id);
+  saveAportes();
+  render();
+  showToast('Aporte excluído');
+}
+
 function deletarMeta(id,nome){
   if(!confirm(`Excluir a meta "${nome}"?`))return;
   metas=metas.filter(m=>m.id!==id);
@@ -1539,6 +1611,7 @@ function _parseCsv(text){
 function clearAll(){if(!confirm('Apagar tudo?'))return;data=[];metas=[];recs=[];wsetup={};['fluxo_v3','fluxo_metas3','fluxo_recs3','fluxo_wsetup'].forEach(k=>localStorage.removeItem(k));render();showToast('Dados apagados');}
 // ── PESSOAS STATE ──────────────────────────────────────────
 let grupos=JSON.parse(localStorage.getItem('fp_grupos')||'[]');
+let aportes=JSON.parse(localStorage.getItem('fp_aportes')||'[]');
 let pgtos_pessoas=JSON.parse(localStorage.getItem('fp_pgtos_pessoas')||'[]');
 let pessoasTab='pendente';
 let gTempPessoas=[];
@@ -1555,6 +1628,16 @@ function setPessoasTab(tab,btn){
 function saveGrupos(){
   localStorage.setItem('fp_grupos',JSON.stringify(grupos));
   sbSaveGrupos();
+}
+function saveAportes(){
+  localStorage.setItem('fp_aportes',JSON.stringify(aportes));
+  sbSaveAportes();
+}
+async function sbSaveAportes(){
+  try{
+    await fetch(sbUrl('fp_configs'),{method:'POST',headers:{...sbH(),'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({id:'aportes_'+SB_UID,user_id:SB_UID,chave:'aportes',dados:aportes})});
+  }catch(e){}
 }
 function savePgtosPessoas(){
   localStorage.setItem('fp_pgtos_pessoas',JSON.stringify(pgtos_pessoas));
@@ -2143,6 +2226,8 @@ async function syncFromServer(){
       const rg=await fetch(sbUrl('fp_configs',`?user_id=eq.${SB_UID}&select=*`),{headers:sbH()});
       if(rg.ok){
         const rows=await rg.json();
+        const ap=rows.find(r=>r.chave==='aportes');
+        if(ap&&ap.dados){aportes=ap.dados;localStorage.setItem('fp_aportes',JSON.stringify(aportes));}
         const pg=rows.find(r=>r.chave==='pgtos_pessoas');
         if(pg&&pg.dados){pgtos_pessoas=pg.dados;localStorage.setItem('fp_pgtos_pessoas',JSON.stringify(pgtos_pessoas));}
       }
@@ -2262,6 +2347,7 @@ async function doLogout(){
 // restaura tema
 grupos=JSON.parse(localStorage.getItem('fp_grupos')||'[]');
 pgtos_pessoas=JSON.parse(localStorage.getItem('fp_pgtos_pessoas')||'[]');
+aportes=JSON.parse(localStorage.getItem('fp_aportes')||'[]');
 const savedTheme=localStorage.getItem('fp_theme');
 if(savedTheme==='dark'){document.body.classList.add('dark');const tb=document.getElementById('themeBtn');if(tb)tb.textContent='☀️';}
 
