@@ -310,6 +310,7 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
 .cartao-item-desc{font-size:12px;font-weight:500;color:var(--t);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:8px}
 .cartao-item-cat{font-size:10px;color:var(--t3);margin-top:1px}
 .cartao-item-val{font-size:12px;font-weight:700;color:var(--red);font-family:'Manrope',sans-serif;flex-shrink:0}
+.cartao-body{display:none;border-top:1px solid var(--b)}
 .cartao-ver-mais{width:100%;background:none;border:none;color:var(--blue);font-size:12px;font-weight:600;padding:10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
 </style>
 </head>
@@ -1728,8 +1729,9 @@ function toggleCartaoCard(id){
   const body=document.getElementById(id);
   const chev=document.getElementById('chev_'+id);
   if(!body||!chev)return;
-  const isOpen=body.classList.toggle('open');
-  chev.textContent=isOpen?'▲':'▼';
+  const isOpen=body.style.display==='block';
+  body.style.display=isOpen?'none':'block';
+  chev.textContent=isOpen?'▼':'▲';
 }
 
 function renderCartoes(){
@@ -1866,7 +1868,7 @@ const sbUrl=(table,qs='')=>`${SB_URL}/rest/v1/${table}${qs}`;
 // converte item local → linha supabase
 function toRow(i){return{id:i.id,user_id:SB_UID,tipo:i.tipo,descricao:i.desc,det:i.det||'',valor:i.valor,data_lanc:i.dataLanc||'',lan_m:i.lanM,lan_y:i.lanY,fat_m:i.fatM,fat_y:i.fatY,cat:i.cat||'',pgto:i.pgto||'',resp:i.resp||'',rec_id:i.recId||null,pessoa_id:i.pessoaId||null};}
 // converte linha supabase → item local
-function fromRow(r){return{id:r.id,tipo:r.tipo,desc:r.descricao,det:r.det||'',valor:parseFloat(r.valor),dataLanc:r.data_lanc||'',lanM:r.lan_m,lanY:r.lan_y,fatM:r.fat_m,fatY:r.fat_y,cat:r.cat||'',pgto:r.pgto||'',resp:r.resp||'',recId:r.rec_id||null};}
+function fromRow(r){return{id:r.id,tipo:r.tipo,desc:r.descricao,det:r.det||'',valor:parseFloat(r.valor),dataLanc:r.data_lanc||'',lanM:r.lan_m,lanY:r.lan_y,fatM:r.fat_m,fatY:r.fat_y,cat:r.cat||'',pgto:r.pgto||'',resp:r.resp||'',recId:r.rec_id||null,pessoaId:r.pessoa_id||null};}
 
 // ── SYNC COMPLETO (pull do servidor) ──────────────────────
 async function syncFromServer(){
