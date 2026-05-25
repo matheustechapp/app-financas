@@ -1724,6 +1724,16 @@ function toggleTheme(){
 }
 
 // ── CARTOES ────────────────────────────────────────────────
+function toggleCartaoCard(id){
+  const body=document.getElementById(id);
+  const chev=document.getElementById('chev_'+id);
+  if(!body||!chev)return;
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+  chev.textContent=chev.classList.contains('open')?'›':'›';
+  chev.style.transform=body.classList.contains('open')?'rotate(90deg)':'';
+}
+
 function renderCartoes(){
   const mlEl=document.getElementById('mlCartoes');
   if(mlEl)mlEl.textContent=mStr(curM,curY);
@@ -1768,36 +1778,53 @@ function renderCartoes(){
     const totalTerceiros=terceiros.reduce((s,i)=>s+i.valor,0);
     const totalGeral=totalPessoal+totalTerceiros;
 
+    const cardId='card_'+card;
+    const pctPessoal=totalGeral>0?Math.round(totalPessoal/totalGeral*100):0;
     return `<div class="cartao-card" style="animation-delay:${idx*60}ms">
-      <div class="cartao-header">
-        <div>
+      <div class="cartao-header" onclick="toggleCartaoCard('${cardId}')">
+        <div style="flex:1;min-width:0">
           <div class="cartao-nome" style="color:${cor}">${nome}</div>
-          <div style="font-size:10px;color:var(--t3);margin-top:2px;font-weight:600">${lancamentos.length} lançamentos</div>
-        </div>
-        <div class="cartao-total">${fmt(totalGeral)}</div>
-      </div>
-      <div class="cartao-bar-wrap">
-        <div style="height:4px;display:flex;border-radius:2px;overflow:hidden">
-          <div style="width:${totalGeral>0?Math.round(totalPessoal/totalGeral*100):0}%;background:${cor};transition:width .5s"></div>
-          <div style="flex:1;background:var(--bbg)"></div>
-        </div>
-      </div>
-      <div class="cartao-items">
-        ${pessoais.length?`
-          <div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;display:flex;justify-content:space-between">
-            <span>Gastos Pessoais</span><span>${fmt(totalPessoal)}</span>
+          <div class="cartao-summary">
+            ${pessoais.length?`<div class="cartao-summary-item">
+              <span class="cartao-summary-label">Pessoal</span>
+              <span class="cartao-summary-val" style="color:var(--red)">${fmt(totalPessoal)}</span>
+            </div>`:''}
+            ${terceiros.length?`<div class="cartao-summary-item">
+              <span class="cartao-summary-label">Terceiros</span>
+              <span class="cartao-summary-val" style="color:var(--blue)">${fmt(totalTerceiros)}</span>
+            </div>`:''}
+            <div class="cartao-summary-item">
+              <span class="cartao-summary-label">Subtotal</span>
+              <span class="cartao-summary-val" style="color:var(--t)">${fmt(totalGeral)}</span>
+            </div>
           </div>
-          ${pessoais.map(i=>lancamentoRow(i)).join('')}`:''}
-        ${terceiros.length?`
-          <div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:var(--blue);letter-spacing:1.5px;text-transform:uppercase;display:flex;justify-content:space-between;border-top:1px solid var(--b);margin-top:4px">
-            <span>Gastos de Terceiros</span><span>${fmt(totalTerceiros)}</span>
+        </div>
+        <div class="cartao-chevron" id="chev_${cardId}">›</div>
+      </div>
+      <div class="cartao-body" id="${cardId}">
+        <div class="cartao-bar-wrap">
+          <div style="height:4px;display:flex;overflow:hidden">
+            <div style="width:${pctPessoal}%;background:${cor};transition:width .5s"></div>
+            <div style="flex:1;background:var(--bbg)"></div>
           </div>
-          ${terceiros.map(i=>lancamentoRow(i)).join('')}`:''}
-        ${pessoais.length&&terceiros.length?`
-          <div style="padding:8px 16px;border-top:1px solid var(--b);display:flex;justify-content:space-between;margin-top:2px">
-            <span style="font-size:12px;font-weight:700;color:var(--t)">Subtotal fatura</span>
-            <span style="font-size:13px;font-weight:800;color:var(--red);font-family:'Manrope',sans-serif">${fmt(totalGeral)}</span>
-          </div>`:''}
+        </div>
+        <div class="cartao-items">
+          ${pessoais.length?`
+            <div class="cartao-section-label" style="color:var(--t3);border-top:none">
+              <span>Gastos Pessoais</span><span>${fmt(totalPessoal)}</span>
+            </div>
+            ${pessoais.map(i=>lancamentoRow(i)).join('')}`:''}
+          ${terceiros.length?`
+            <div class="cartao-section-label" style="color:var(--blue)">
+              <span>Gastos de Terceiros</span><span>${fmt(totalTerceiros)}</span>
+            </div>
+            ${terceiros.map(i=>lancamentoRow(i)).join('')}`:''}
+          ${pessoais.length&&terceiros.length?`
+            <div style="padding:10px 16px;border-top:1px solid var(--b);display:flex;justify-content:space-between">
+              <span style="font-size:12px;font-weight:700;color:var(--t)">Subtotal fatura</span>
+              <span style="font-size:13px;font-weight:800;color:var(--red);font-family:'Manrope',sans-serif">${fmt(totalGeral)}</span>
+            </div>`:''}
+        </div>
       </div>
     </div>`;
   }).join('');
