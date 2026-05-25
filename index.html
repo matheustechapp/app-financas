@@ -1728,10 +1728,8 @@ function toggleCartaoCard(id){
   const body=document.getElementById(id);
   const chev=document.getElementById('chev_'+id);
   if(!body||!chev)return;
-  body.classList.toggle('open');
-  chev.classList.toggle('open');
-  chev.textContent=chev.classList.contains('open')?'›':'›';
-  chev.style.transform=body.classList.contains('open')?'rotate(90deg)':'';
+  const isOpen=body.classList.toggle('open');
+  chev.textContent=isOpen?'▲':'▼';
 }
 
 function renderCartoes(){
@@ -1799,7 +1797,7 @@ function renderCartoes(){
             </div>
           </div>
         </div>
-        <div class="cartao-chevron" id="chev_${cardId}">›</div>
+        <div class="cartao-chevron" id="chev_${cardId}">▼</div>
       </div>
       <div class="cartao-body" id="${cardId}">
         <div class="cartao-bar-wrap">
