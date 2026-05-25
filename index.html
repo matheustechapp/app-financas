@@ -139,6 +139,13 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
 .meta-pct{font-size:11px;font-weight:700}
 .meta-period{font-size:10px;color:var(--t3);font-weight:500}
 .add-meta{width:100%;background:var(--bg2);border:2px dashed var(--b2);border-radius:var(--r);padding:12px;font-size:12px;color:var(--t3);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:8px;font-weight:600;box-shadow:var(--shadow)}
+.meta-tipo-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;border-radius:4px;padding:2px 7px;margin-bottom:6px}
+.meta-tipo-teto{background:var(--rbg);color:var(--red)}
+.meta-tipo-econ{background:var(--gbg);color:var(--green)}
+.meta-actions{display:flex;gap:6px;margin-top:8px}
+.meta-btn{flex:1;background:none;border:1px solid var(--b2);border-radius:var(--rs);padding:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--t3)}
+.meta-btn.edit{color:var(--blue);border-color:var(--blue)}
+.meta-btn.del{color:var(--red);border-color:var(--red)}
 
 /* HISTORICO */
 .hist-month{background:var(--bg2);border-radius:var(--r);margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow)}
@@ -660,14 +667,29 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
 <div class="mbg" id="mbgMeta" onclick="closeMetaBg(event)">
   <div class="modal">
     <div class="m-handle"></div>
-    <div class="m-title">Nova Meta</div>
-    <div class="field"><label>Nome</label><input type="text" id="mNome" placeholder="Ex: Limite de Alimentação"></div>
-    <div class="fr2">
-      <div class="field"><label>Limite (R$)</label><input type="number" id="mLim" inputmode="decimal"></div>
-      <div class="field"><label>Categoria</label><select id="mCat"></select></div>
+    <div class="m-title" id="metaModalTitle">Nova Meta</div>
+    <!-- tipo -->
+    <div class="type-row" style="margin-bottom:14px">
+      <button class="tbtn" id="mTipoTeto" onclick="setMetaTipo('teto')" style="border-color:var(--red);background:var(--rbg);color:var(--red)">🎯 Teto de gastos</button>
+      <button class="tbtn" id="mTipoEcon" onclick="setMetaTipo('economia')">💰 Meta de economia</button>
     </div>
-    <div class="slabel" style="margin-bottom:7px;margin-top:2px">Período</div>
-    <div class="fr2">
+    <div class="field"><label>Nome / objetivo</label><input type="text" id="mNome" placeholder="Ex: Limite Gastos Extras, Lava e Seca..."></div>
+    <!-- campos teto -->
+    <div id="mCamposTeto">
+      <div class="fr2">
+        <div class="field"><label>Limite (R$)</label><input type="number" id="mLim" inputmode="decimal" placeholder="0,00"></div>
+        <div class="field"><label>Categoria</label><select id="mCat"></select></div>
+      </div>
+    </div>
+    <!-- campos economia -->
+    <div id="mCamposEcon" style="display:none">
+      <div class="fr2">
+        <div class="field"><label>Total do objetivo (R$)</label><input type="number" id="mTotal" inputmode="decimal" placeholder="Ex: 2400"></div>
+        <div class="field"><label>Por mês (R$)</label><input type="number" id="mPorMes" inputmode="decimal" placeholder="Ex: 400"></div>
+      </div>
+    </div>
+    <!-- período -->
+    <div class="fr2" style="margin-top:4px">
       <div class="field"><label>Fatura inicial</label><select id="mIni"></select></div>
       <div class="field"><label>Fatura final</label><select id="mFim"></select></div>
     </div>
@@ -675,6 +697,7 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
       <label>Cor</label>
       <div style="display:flex;gap:6px;flex-wrap:wrap" id="metaCores"></div>
     </div>
+    <input type="hidden" id="mEditId">
     <div class="m-actions">
       <button class="btn-c" onclick="closeMetaModal()">Cancelar</button>
       <button class="btn-s" onclick="salvarMeta()">Salvar</button>
@@ -1056,28 +1079,91 @@ function toggleHist(k){
 
 // ── METAS ──────────────────────────────────────────────────
 function renderMetas(){
+  const mlEl=document.getElementById('mlMetas');
+  if(mlEl)mlEl.textContent=mStr(curM,curY);
   const el=document.getElementById('metasEl');
+  if(!el)return;
+
   let html=metas.map(m=>{
-    // calcular gastos no período da meta
-    const iniM=m.iniM??curM,iniY=m.iniY??curY;
-    const fimM=m.fimM??curM,fimY=m.fimY??curY;
-    const gasto=data.filter(i=>{
-      if(i.tipo!=='saida'||i.cat!==m.cat)return false;
-      const ky=i.fatY,km=i.fatM;
-      return(ky>iniY||(ky===iniY&&km>=iniM))&&(ky<fimY||(ky===fimY&&km<=fimM));
-    }).reduce((a,i)=>a+i.valor,0);
-    const pct=m.lim>0?Math.min(gasto/m.lim*100,100):0;
-    const cor=pct>=100?'var(--red)':pct>=80?'var(--amber)':m.cor||'var(--green)';
+    const iniM=m.iniM,iniY=m.iniY,fimM=m.fimM,fimY=m.fimY;
+    // check if current month is within meta period
+    const curKey=curY*100+curM;
+    const iniKey=iniY*100+iniM;
+    const fimKey=fimY*100+fimM;
+    const isAtiva=curKey>=iniKey&&curKey<=fimKey;
     const periodo=iniM===fimM&&iniY===fimY?mStr(iniM,iniY):`${mStr(iniM,iniY)} → ${mStr(fimM,fimY)}`;
-    return `<div class="meta-card">
-      <div class="meta-head"><span class="meta-name">${m.nome}</span><span class="meta-vals">${fmt(gasto)} / ${fmt(m.lim)}</span></div>
-      <div class="meta-track"><div class="meta-fill" style="width:${pct}%;background:${cor}"></div></div>
-      <div class="meta-footer"><span class="meta-pct" style="color:${cor}">${Math.round(pct)}%</span><span class="meta-period">${periodo}</span></div>
-    </div>`;
+
+    if(m.tipo==='teto'){
+      // only count gastos within the exact period
+      const gasto=data.filter(i=>{
+        if(i.tipo!=='saida'||i.cat!==m.cat)return false;
+        const k=i.fatY*100+i.fatM;
+        return k>=iniKey&&k<=fimKey;
+      }).reduce((a,i)=>a+i.valor,0);
+      const pct=m.lim>0?Math.min(gasto/m.lim*100,100):0;
+      const cor=pct>=100?'var(--red)':pct>=80?'var(--amber)':m.cor||'var(--green)';
+      return `<div class="meta-card">
+        <div class="meta-tipo-badge meta-tipo-teto">🎯 Teto de gastos</div>
+        <div class="meta-head"><span class="meta-name">${m.nome}</span><span class="meta-vals">${fmt(gasto)} / ${fmt(m.lim)}</span></div>
+        <div class="meta-track"><div class="meta-fill" style="width:${pct}%;background:${cor}"></div></div>
+        <div class="meta-footer">
+          <span class="meta-pct" style="color:${cor}">${Math.round(pct)}% do teto</span>
+          <span class="meta-period">${periodo}</span>
+        </div>
+        ${!isAtiva?`<div style="font-size:10px;color:var(--t3);margin-top:4px">${curKey<iniKey?'Ainda não iniciada':'Encerrada'}</div>`:''}
+        <div class="meta-actions">
+          <button class="meta-btn edit" onclick="openMetaModal('${m.id}')">✏️ Editar</button>
+          <button class="meta-btn del" onclick="deletarMeta('${m.id}','${m.nome}')">🗑 Excluir</button>
+        </div>
+      </div>`;
+    } else {
+      // economia: conta meses no período e calcula acumulado
+      const mesesNoPeriodo=[];
+      let y=iniY,mo=iniM;
+      while(y*100+mo<=fimKey){mesesNoPeriodo.push({m:mo,y});mo++;if(mo>11){mo=0;y++;}}
+      const totalMeses=mesesNoPeriodo.length;
+      // meses já passados (incluindo atual) dentro do período
+      const mesesPassados=mesesNoPeriodo.filter(x=>x.y*100+x.m<=curKey).length;
+      const porMes=m.porMes||0;
+      const totalObj=m.totalObj||(porMes*totalMeses);
+      const acumulado=Math.min(mesesPassados*porMes,totalObj);
+      const pct=totalObj>0?Math.min(acumulado/totalObj*100,100):0;
+      const cor=m.cor||'var(--blue)';
+      return `<div class="meta-card">
+        <div class="meta-tipo-badge meta-tipo-econ">💰 Meta de economia</div>
+        <div class="meta-head"><span class="meta-name">${m.nome}</span><span class="meta-vals">${fmt(acumulado)} / ${fmt(totalObj)}</span></div>
+        <div class="meta-track"><div class="meta-fill" style="width:${pct}%;background:${cor}"></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:8px;margin-bottom:4px">
+          <div style="text-align:center;background:var(--bg3);border-radius:6px;padding:6px 4px">
+            <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px">POR MÊS</div>
+            <div style="font-size:12px;font-weight:700;color:var(--t);font-family:'Manrope',sans-serif">${fmt(porMes)}</div>
+          </div>
+          <div style="text-align:center;background:var(--bg3);border-radius:6px;padding:6px 4px">
+            <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px">MESES</div>
+            <div style="font-size:12px;font-weight:700;color:var(--t);font-family:'Manrope',sans-serif">${mesesPassados}/${totalMeses}</div>
+          </div>
+          <div style="text-align:center;background:var(--bg3);border-radius:6px;padding:6px 4px">
+            <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px">FALTA</div>
+            <div style="font-size:12px;font-weight:700;color:${cor};font-family:'Manrope',sans-serif">${fmt(Math.max(0,totalObj-acumulado))}</div>
+          </div>
+        </div>
+        <div class="meta-footer">
+          <span class="meta-pct" style="color:${cor}">${Math.round(pct)}% do objetivo</span>
+          <span class="meta-period">${periodo}</span>
+        </div>
+        ${!isAtiva?`<div style="font-size:10px;color:var(--t3);margin-top:4px">${curKey<iniKey?'Ainda não iniciada':'Concluída 🎉'}</div>`:''}
+        <div class="meta-actions">
+          <button class="meta-btn edit" onclick="openMetaModal('${m.id}')">✏️ Editar</button>
+          <button class="meta-btn del" onclick="deletarMeta('${m.id}','${m.nome}')">🗑 Excluir</button>
+        </div>
+      </div>`;
+    }
   }).join('');
+
   html+=`<button class="add-meta" onclick="openMetaModal()">+ Nova meta</button>`;
   el.innerHTML=html;
 }
+
 
 // ── CONFIG ─────────────────────────────────────────────────
 function renderCfg(){
@@ -1211,27 +1297,91 @@ function salvar(){
 }
 
 // ── META MODAL ─────────────────────────────────────────────
-function openMetaModal(){
-  document.getElementById('mNome').value='';document.getElementById('mLim').value='';
+let curMetaTipo='teto';
+
+function setMetaTipo(tipo){
+  curMetaTipo=tipo;
+  document.getElementById('mTipoTeto').className='tbtn'+(tipo==='teto'?' active-s':'');
+  document.getElementById('mTipoEcon').className='tbtn'+(tipo==='economia'?' ae':'');
+  if(tipo==='teto'){
+    document.getElementById('mTipoTeto').style.cssText='border-color:var(--red);background:var(--rbg);color:var(--red)';
+    document.getElementById('mTipoEcon').style.cssText='';
+  } else {
+    document.getElementById('mTipoEcon').style.cssText='border-color:var(--green);background:var(--gbg);color:var(--green)';
+    document.getElementById('mTipoTeto').style.cssText='';
+  }
+  document.getElementById('mCamposTeto').style.display=tipo==='teto'?'block':'none';
+  document.getElementById('mCamposEcon').style.display=tipo==='economia'?'block':'none';
+}
+
+function openMetaModal(editId=null){
+  document.getElementById('mEditId').value=editId||'';
+  document.getElementById('metaModalTitle').textContent=editId?'Editar Meta':'Nova Meta';
   document.getElementById('mCat').innerHTML=CS.map(c=>`<option>${c}</option>`).join('');
-  document.getElementById('mIni').innerHTML=mesOpts(curM,curY);
-  document.getElementById('mFim').innerHTML=mesOpts(curM,curY);
   document.getElementById('metaCores').innerHTML=PAL.map(c=>`<div onclick="selCor('${c}',this)" style="width:22px;height:22px;border-radius:50%;background:${c};cursor:pointer;border:3px solid ${c===curMetaCor?'#fff':'transparent'};transition:border-color .15s"></div>`).join('');
+  if(editId){
+    const m=metas.find(x=>x.id===editId);
+    if(m){
+      setMetaTipo(m.tipo||'teto');
+      document.getElementById('mNome').value=m.nome;
+      document.getElementById('mLim').value=m.lim||'';
+      document.getElementById('mTotal').value=m.totalObj||'';
+      document.getElementById('mPorMes').value=m.porMes||'';
+      document.getElementById('mCat').value=m.cat||CS[0];
+      curMetaCor=m.cor||PAL[0];
+      document.getElementById('mIni').innerHTML=mesOpts(m.iniM,m.iniY);
+      document.getElementById('mFim').innerHTML=mesOpts(m.fimM,m.fimY);
+      document.getElementById('metaCores').innerHTML=PAL.map(c=>`<div onclick="selCor('${c}',this)" style="width:22px;height:22px;border-radius:50%;background:${c};cursor:pointer;border:3px solid ${c===curMetaCor?'#fff':'transparent'};transition:border-color .15s"></div>`).join('');
+    }
+  } else {
+    setMetaTipo('teto');
+    document.getElementById('mNome').value='';
+    document.getElementById('mLim').value='';
+    document.getElementById('mTotal').value='';
+    document.getElementById('mPorMes').value='';
+    document.getElementById('mIni').innerHTML=mesOpts(curM,curY);
+    document.getElementById('mFim').innerHTML=mesOpts(curM,curY);
+  }
   document.getElementById('mbgMeta').classList.add('open');
 }
 function selCor(c,el){curMetaCor=c;document.querySelectorAll('#metaCores div').forEach(d=>d.style.borderColor='transparent');el.style.borderColor='#fff';}
 function closeMetaModal(){document.getElementById('mbgMeta').classList.remove('open');}
 function closeMetaBg(e){if(e.target===document.getElementById('mbgMeta'))closeMetaModal();}
+
 function salvarMeta(){
   const nome=document.getElementById('mNome').value.trim();
-  const lim=parseFloat(document.getElementById('mLim').value);
-  if(!nome||!lim){showToast('Preencha nome e limite');return;}
+  if(!nome){showToast('Preencha o nome');return;}
   const ip=document.getElementById('mIni').value.split('-');
   const fp=document.getElementById('mFim').value.split('-');
-  metas.push({id:Date.now().toString(),nome,lim,cat:document.getElementById('mCat').value,cor:curMetaCor,iniM:parseInt(ip[0]),iniY:parseInt(ip[1]),fimM:parseInt(fp[0]),fimY:parseInt(fp[1])});
+  const iniM=parseInt(ip[0]),iniY=parseInt(ip[1]);
+  const fimM=parseInt(fp[0]),fimY=parseInt(fp[1]);
+  // validate period
+  if(iniY*100+iniM>fimY*100+fimM){showToast('Período inválido — início após fim');return;}
+  const editId=document.getElementById('mEditId').value;
+  let meta;
+  if(curMetaTipo==='teto'){
+    const lim=parseFloat(document.getElementById('mLim').value);
+    if(!lim){showToast('Preencha o limite');return;}
+    meta={id:editId||Date.now().toString(),tipo:'teto',nome,lim,cat:document.getElementById('mCat').value,cor:curMetaCor,iniM,iniY,fimM,fimY};
+  } else {
+    const totalObj=parseFloat(document.getElementById('mTotal').value);
+    const porMes=parseFloat(document.getElementById('mPorMes').value);
+    if(!totalObj&&!porMes){showToast('Preencha o valor total ou por mês');return;}
+    meta={id:editId||Date.now().toString(),tipo:'economia',nome,totalObj:totalObj||0,porMes:porMes||0,cor:curMetaCor,iniM,iniY,fimM,fimY};
+  }
+  if(editId){metas=metas.map(m=>m.id===editId?meta:m);}
+  else{metas.push(meta);}
   localStorage.setItem('fluxo_metas3',JSON.stringify(metas));
-  sbSaveMeta(metas[metas.length-1]);
-  closeMetaModal();render();showToast('Meta criada!');
+  sbSaveMeta(meta);
+  closeMetaModal();render();showToast(editId?'Meta atualizada!':'Meta criada!');
+}
+
+function deletarMeta(id,nome){
+  if(!confirm(`Excluir a meta "${nome}"?`))return;
+  metas=metas.filter(m=>m.id!==id);
+  localStorage.setItem('fluxo_metas3',JSON.stringify(metas));
+  try{fetch(sbUrl('metas',`?id=eq.${id}`),{method:'DELETE',headers:sbH()});}catch(e){}
+  render();showToast('Meta excluída');
 }
 
 // ── FILTER ─────────────────────────────────────────────────
@@ -1428,20 +1578,124 @@ function getGastosComPessoa(pessoaId, m, y){
   const mm=m??curM, yy=y??curY;
   return data.filter(i=>i.tipo==='saida'&&i.pessoaId===pessoaId&&i.fatM===mm&&i.fatY===yy);
 }
+function getTodosGastosComPessoa(pessoaId){
+  return data.filter(i=>i.tipo==='saida'&&i.pessoaId===pessoaId);
+}
 function getGastosGrupo(grupo, m, y){
-  // para grupos com cobrança em grupo, busca por resp=nome do grupo ou por pessoaId das pessoas do grupo
   const mm=m??curM, yy=y??curY;
   const pessoaIds=grupo.pessoas.map(p=>p.id);
   return data.filter(i=>i.tipo==='saida'&&i.fatM===mm&&i.fatY===yy&&
+    (i.resp===grupo.nome||pessoaIds.includes(i.pessoaId)));
+}
+function getTodosGastosGrupo(grupo){
+  const pessoaIds=grupo.pessoas.map(p=>p.id);
+  return data.filter(i=>i.tipo==='saida'&&
     (i.resp===grupo.nome||pessoaIds.includes(i.pessoaId)));
 }
 function getPgtosRecebidos(pessoaId, m, y){
   const mm=m??curM, yy=y??curY;
   return pgtos_pessoas.filter(p=>p.pessoaId===pessoaId&&p.fatM===mm&&p.fatY===yy);
 }
+function getTodosPgtosRecebidos(pessoaId){
+  return pgtos_pessoas.filter(p=>p.pessoaId===pessoaId);
+}
 function getPgtosGrupo(grupoId, m, y){
   const mm=m??curM, yy=y??curY;
   return pgtos_pessoas.filter(p=>p.pessoaId==='grupo_'+grupoId&&p.fatM===mm&&p.fatY===yy);
+}
+function getTodosPgtosGrupo(grupoId){
+  return pgtos_pessoas.filter(p=>p.pessoaId==='grupo_'+grupoId);
+}
+
+// Retorna meses únicos com saldo pendente para uma pessoa
+function getPendenciasPorMes(pessoaId){
+  const todosGastos=getTodosGastosComPessoa(pessoaId);
+  const todosPgtos=getTodosPgtosRecebidos(pessoaId);
+  // agrupar gastos por mês
+  const mesesMap={};
+  todosGastos.forEach(g=>{
+    const k=`${g.fatY}-${String(g.fatM).padStart(2,'0')}`;
+    if(!mesesMap[k])mesesMap[k]={m:g.fatM,y:g.fatY,gastos:[],pgtos:[]};
+    mesesMap[k].gastos.push(g);
+  });
+  todosPgtos.forEach(p=>{
+    const k=`${p.fatY}-${String(p.fatM).padStart(2,'0')}`;
+    if(!mesesMap[k])mesesMap[k]={m:p.fatM,y:p.fatY,gastos:[],pgtos:[]};
+    mesesMap[k].pgtos.push(p);
+  });
+  return Object.entries(mesesMap)
+    .sort((a,b)=>b[0].localeCompare(a[0]))
+    .map(([k,v])=>({
+      ...v, key:k,
+      totalGasto:v.gastos.reduce((a,i)=>a+i.valor,0),
+      totalRecebido:v.pgtos.reduce((a,p)=>a+p.valor,0),
+      deve:Math.max(0,v.gastos.reduce((a,i)=>a+i.valor,0)-v.pgtos.reduce((a,p)=>a+p.valor,0))
+    }));
+}
+function getPendenciasPorMesGrupo(grupo){
+  const todosGastos=getTodosGastosGrupo(grupo);
+  const todosPgtos=getTodosPgtosGrupo(grupo.id);
+  const mesesMap={};
+  todosGastos.forEach(g=>{
+    const k=`${g.fatY}-${String(g.fatM).padStart(2,'0')}`;
+    if(!mesesMap[k])mesesMap[k]={m:g.fatM,y:g.fatY,gastos:[],pgtos:[]};
+    mesesMap[k].gastos.push(g);
+  });
+  todosPgtos.forEach(p=>{
+    const k=`${p.fatY}-${String(p.fatM).padStart(2,'0')}`;
+    if(!mesesMap[k])mesesMap[k]={m:p.fatM,y:p.fatY,gastos:[],pgtos:[]};
+    mesesMap[k].pgtos.push(p);
+  });
+  return Object.entries(mesesMap)
+    .sort((a,b)=>b[0].localeCompare(a[0]))
+    .map(([k,v])=>({
+      ...v, key:k,
+      totalGasto:v.gastos.reduce((a,i)=>a+i.valor,0),
+      totalRecebido:v.pgtos.reduce((a,p)=>a+p.valor,0),
+      deve:Math.max(0,v.gastos.reduce((a,i)=>a+i.valor,0)-v.pgtos.reduce((a,p)=>a+p.valor,0))
+    }));
+}
+
+function mesesEmAtraso(pendencias){
+  const curKey=`${curY}-${String(curM).padStart(2,'0')}`;
+  return pendencias.filter(p=>p.key<curKey&&p.deve>0);
+}
+
+function totalPendenteGlobal(pendencias){
+  return pendencias.reduce((a,p)=>a+p.deve,0);
+}
+
+function renderPendenciasHtml(pendencias, pessoaId, isGrupoId=null){
+  const curKey=`${curY}-${String(curM).padStart(2,'0')}`;
+  return pendencias.map(p=>{
+    const isAtrasado=p.key<curKey&&p.deve>0;
+    const isMesAtual=p.key===curKey;
+    return `<div style="border-bottom:1px solid var(--b);padding:10px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;font-weight:700;color:${isAtrasado?'var(--amber)':isMesAtual?'var(--blue)':'var(--t)'}">${MS[p.m]} ${p.y}</span>
+          ${isAtrasado?'<span style="font-size:9px;background:var(--abg);color:var(--amber);border-radius:4px;padding:1px 6px;font-weight:700">ATRASADO</span>':''}
+          ${isMesAtual?'<span style="font-size:9px;background:var(--bbg);color:var(--blue);border-radius:4px;padding:1px 6px;font-weight:700">MÊS ATUAL</span>':''}
+        </div>
+        <span style="font-size:13px;font-weight:800;font-family:'Manrope',sans-serif;color:${p.deve>0?'var(--red)':'var(--green)'}">${p.deve>0?fmt(p.deve):'Quitado'}</span>
+      </div>
+      ${p.gastos.map(g=>`
+        <div class="pessoa-gasto-item" style="padding:5px 0">
+          <div><div class="pessoa-gasto-desc">${g.desc}</div>
+          <div class="pessoa-gasto-meta">${g.cat} · ${fmtD(g.dataLanc)}</div></div>
+          <div class="pessoa-gasto-val">${fmt(g.valor)}</div>
+        </div>`).join('')}
+      ${p.pgtos.length?`<div style="margin-top:6px;background:var(--gbg);border-radius:6px;padding:6px 10px">
+        ${p.pgtos.map(pg=>`<div class="pessoa-pgto-item">
+          <span class="pessoa-pgto-desc">${pg.obs||'Pagamento'} · ${fmtD(pg.data)}</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="pessoa-pgto-val">+${fmt(pg.valor)}</span>
+            <button onclick="deletarPgto('${pg.id}')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px">🗑</button>
+          </div>
+        </div>`).join('')}
+      </div>`:''}
+    </div>`;
+  }).join('');
 }
 
 function renderPessoas(){
@@ -1454,121 +1708,85 @@ function renderPessoas(){
     return;
   }
   el.innerHTML=grupos.map((grupo,gi)=>{
-    // For cobrarGrupo, show a single group view instead of per-person
     let pessoasHtml='';
+
     if(grupo.cobrarGrupo){
-      const gastosG=getGastosGrupo(grupo);
-      const totalGastoG=gastosG.reduce((a,i)=>a+i.valor,0);
-      const recebG=getPgtosGrupo(grupo.id);
-      const totalRecebG=recebG.reduce((a,p)=>a+p.valor,0);
-      const deveG=Math.max(0,totalGastoG-totalRecebG);
-      if(pessoasTab==='pendente'&&totalGastoG===0){pessoasHtml='';}
+      const pendencias=getPendenciasPorMesGrupo(grupo);
+      const totalPendente=totalPendenteGlobal(pendencias);
+      const atrasados=mesesEmAtraso(pendencias);
+      const temAtraso=atrasados.length>0;
+      if(pessoasTab==='pendente'&&totalPendente===0){pessoasHtml='';}
       else {
-        const gastosHtmlG=gastosG.map(g=>`
-          <div class="pessoa-gasto-item">
-            <div><div class="pessoa-gasto-desc">${g.desc}</div>
-            <div class="pessoa-gasto-meta">${g.cat} · ${fmtD(g.dataLanc)}</div></div>
-            <div class="pessoa-gasto-val">${fmt(g.valor)}</div>
-          </div>`).join('');
-        const pgtoHtmlG=recebG.length?`<div class="pessoa-pgtos">
-          <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:1px;margin-bottom:4px">RECEBIMENTOS</div>
-          ${recebG.map(p=>`<div class="pessoa-pgto-item">
-            <span class="pessoa-pgto-desc">${p.obs||'Pagamento'} · ${fmtD(p.data)}</span>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span class="pessoa-pgto-val">+${fmt(p.valor)}</span>
-              <button onclick="deletarPgto('${p.id}')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px" title="Excluir">🗑</button>
-            </div>
-          </div>`).join('')}
-        </div>`:'';
         pessoasHtml=`<div class="pessoa-card">
           <div class="pessoa-head" onclick="togglePessoa('grp${gi}')">
             <div class="pessoa-avatar" style="background:var(--blue)">G</div>
             <div class="pessoa-info">
-              <div class="pessoa-nome">${grupo.nome}</div>
-              <div class="pessoa-sub">${gastosG.length} gasto${gastosG.length!==1?'s':''} · recebido ${fmt(totalRecebG)}</div>
+              <div class="pessoa-nome">${grupo.nome}${temAtraso?` <span style="font-size:10px;color:var(--amber)">⚠️ ${atrasados.length} ${atrasados.length===1?'mês':'meses'} em atraso</span>`:''}</div>
+              <div class="pessoa-sub">${pendencias.length} ${pendencias.length===1?'mês':'meses'} com movimento · recebido ${fmt(pendencias.reduce((a,p)=>a+p.totalRecebido,0))}</div>
             </div>
             <div class="pessoa-deve">
-              <div class="pessoa-deve-val ${deveG>0?'positivo':'quitado'}">${deveG>0?fmt(deveG):'Quitado'}</div>
-              <div class="pessoa-deve-label">${deveG>0?'a receber':'em dia'}</div>
+              <div class="pessoa-deve-val ${totalPendente>0?'positivo':'quitado'}">${totalPendente>0?fmt(totalPendente):'Quitado'}</div>
+              <div class="pessoa-deve-label">${totalPendente>0?'total pendente':'em dia'}</div>
             </div>
           </div>
           <div class="pessoa-body" id="grp${gi}">
-            <div class="pessoa-gastos">${gastosHtmlG||'<div style="padding:12px 16px;font-size:12px;color:var(--t3)">Nenhum gasto este mês</div>'}</div>
-            ${pgtoHtmlG}
+            ${renderPendenciasHtml(pendencias,null,'grupo_'+grupo.id)}
+            <div class="pessoa-actions">
+              <button class="btn-receber" onclick="openReceberGrupoModal('${grupo.id}','${grupo.nome}',${totalPendente})">↓ Registrar recebimento</button>
+            </div>
           </div>
         </div>`;
       }
     } else {
-    pessoasHtml=grupo.pessoas.map((pessoa,pi)=>{
-      const gastos=getGastosComPessoa(pessoa.id);
-      const totalGasto=gastos.reduce((a,i)=>a+i.valor,0);
-      const recebidos=getPgtosRecebidos(pessoa.id);
-      const totalRecebido=recebidos.reduce((a,p)=>a+p.valor,0);
-      const deve=Math.max(0,totalGasto-totalRecebido);
-      const cor=AVATAR_COLORS[(gi*3+pi)%AVATAR_COLORS.length];
-      const inicial=pessoa.nome.charAt(0).toUpperCase();
-
-      if(pessoasTab==='pendente'&&totalGasto===0)return '';
-
-      const gastosHtml=gastos.map(g=>`
-        <div class="pessoa-gasto-item">
-          <div><div class="pessoa-gasto-desc">${g.desc}</div>
-          <div class="pessoa-gasto-meta">${g.cat} · ${fmtD(g.dataLanc)}</div></div>
-          <div class="pessoa-gasto-val">${fmt(g.valor)}</div>
-        </div>`).join('');
-
-      const pgtoHtml=recebidos.length?`<div class="pessoa-pgtos">
-        <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:1px;margin-bottom:4px">RECEBIMENTOS</div>
-        ${recebidos.map(p=>`<div class="pessoa-pgto-item">
-          <span class="pessoa-pgto-desc">${p.obs||'Pagamento'} · ${fmtD(p.data)}</span>
-          <span class="pessoa-pgto-val">+${fmt(p.valor)}</span>
-        </div>`).join('')}
-      </div>`:'';
-
-      return `<div class="pessoa-card">
-        <div class="pessoa-head" onclick="togglePessoa('p${gi}_${pi}')">
-          <div class="pessoa-avatar" style="background:${cor}">${inicial}</div>
-          <div class="pessoa-info">
-            <div class="pessoa-nome">${pessoa.nome}</div>
-            <div class="pessoa-sub">${gastos.length} gasto${gastos.length!==1?'s':''} · recebido ${fmt(totalRecebido)}</div>
+      pessoasHtml=grupo.pessoas.map((pessoa,pi)=>{
+        const pendencias=getPendenciasPorMes(pessoa.id);
+        const totalPendente=totalPendenteGlobal(pendencias);
+        const atrasados=mesesEmAtraso(pendencias);
+        const temAtraso=atrasados.length>0;
+        const cor=AVATAR_COLORS[(gi*3+pi)%AVATAR_COLORS.length];
+        const inicial=pessoa.nome.charAt(0).toUpperCase();
+        if(pessoasTab==='pendente'&&totalPendente===0)return '';
+        return `<div class="pessoa-card">
+          <div class="pessoa-head" onclick="togglePessoa('p${gi}_${pi}')">
+            <div class="pessoa-avatar" style="background:${cor}">${inicial}</div>
+            <div class="pessoa-info">
+              <div class="pessoa-nome">${pessoa.nome}${temAtraso?` <span style="font-size:10px;color:var(--amber)">⚠️ ${atrasados.length} ${atrasados.length===1?'mês':'meses'}</span>`:''}</div>
+              <div class="pessoa-sub">${pendencias.length} ${pendencias.length===1?'mês':'meses'} com movimento · recebido ${fmt(pendencias.reduce((a,p)=>a+p.totalRecebido,0))}</div>
+            </div>
+            <div class="pessoa-deve">
+              <div class="pessoa-deve-val ${totalPendente>0?'positivo':'quitado'}">${totalPendente>0?fmt(totalPendente):'Quitado'}</div>
+              <div class="pessoa-deve-label">${totalPendente>0?'total pendente':'em dia'}</div>
+            </div>
           </div>
-          <div class="pessoa-deve">
-            <div class="pessoa-deve-val ${deve>0?'positivo':'quitado'}">${deve>0?fmt(deve):'Quitado'}</div>
-            <div class="pessoa-deve-label">${deve>0?'a receber':'em dia'}</div>
+          <div class="pessoa-body" id="p${gi}_${pi}">
+            ${renderPendenciasHtml(pendencias,pessoa.id)}
+            <div class="pessoa-actions">
+              <button class="btn-receber" onclick="openReceberModal('${pessoa.id}','${pessoa.nome}',${totalPendente})">↓ Registrar recebimento</button>
+              <button class="btn-add-gasto" onclick="openModalParaPessoa('${pessoa.id}','${pessoa.nome}')">+ Novo gasto</button>
+            </div>
           </div>
-        </div>
-        <div class="pessoa-body" id="p${gi}_${pi}">
-          <div class="pessoa-gastos">${gastosHtml||'<div style="padding:12px 16px;font-size:12px;color:var(--t3)">Nenhum gasto este mês</div>'}</div>
-          ${pgtoHtml}
-          <div class="pessoa-actions">
-            <button class="btn-receber" onclick="openReceberModal('${pessoa.id}','${pessoa.nome}',${deve})">↓ Registrar recebimento</button>
-            <button class="btn-add-gasto" onclick="openModalParaPessoa('${pessoa.id}','${pessoa.nome}')">+ Novo gasto</button>
-          </div>
-        </div>
-      </div>`;
-    }).filter(Boolean).join('');
-    } // end else cobrarGrupo
+        </div>`;
+      }).filter(Boolean).join('');
+    }
 
-    if(pessoasTab==='pendente'&&!pessoasHtml.trim())return '';
-
+    // total geral do grupo (todos os meses)
     let totalGrupo=0;
     if(grupo.cobrarGrupo){
-      const gastosG=getGastosGrupo(grupo).reduce((a,i)=>a+i.valor,0);
-      const recebG=getPgtosGrupo(grupo.id).reduce((a,p)=>a+p.valor,0);
-      totalGrupo=Math.max(0,gastosG-recebG);
+      totalGrupo=totalPendenteGlobal(getPendenciasPorMesGrupo(grupo));
     } else {
-      totalGrupo=grupo.pessoas.reduce((a,p)=>{
-        const g=getGastosComPessoa(p.id).reduce((s,i)=>s+i.valor,0);
-        const r=getPgtosRecebidos(p.id).reduce((s,pg)=>s+pg.valor,0);
-        return a+Math.max(0,g-r);
-      },0);
+      totalGrupo=grupo.pessoas.reduce((a,p)=>a+totalPendenteGlobal(getPendenciasPorMes(p.id)),0);
     }
+    const atrasadosGrupo=grupo.cobrarGrupo?
+      mesesEmAtraso(getPendenciasPorMesGrupo(grupo)):
+      grupo.pessoas.flatMap(p=>mesesEmAtraso(getPendenciasPorMes(p.id)));
+
+    if(pessoasTab==='pendente'&&!pessoasHtml.trim())return '';
 
     return `<div class="grupo-section">
       <div class="grupo-header">
         <div>
-          <div class="grupo-nome">${grupo.nome}</div>
-          ${grupo.cobrarGrupo?'<div style="font-size:10px;color:var(--t3);font-weight:600;margin-top:1px">Cobrança em grupo</div>':'<div style="font-size:10px;color:var(--t3);font-weight:600;margin-top:1px">Cobrança individual</div>'}
+          <div class="grupo-nome">${grupo.nome}${atrasadosGrupo.length>0?` <span style="font-size:10px;color:var(--amber);font-weight:700">⚠️</span>`:''}</div>
+          <div style="font-size:10px;color:var(--t3);font-weight:600;margin-top:1px">${grupo.cobrarGrupo?'Cobrança em grupo':'Cobrança individual'}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           ${totalGrupo>0?`<div class="grupo-total">${fmt(totalGrupo)}</div>`:'<div style="font-size:11px;color:var(--green);font-weight:700">Quitado</div>'}
@@ -1577,7 +1795,7 @@ function renderPessoas(){
           <button onclick="deletarGrupo('${grupo.id}','${grupo.nome}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:2px">🗑</button>
         </div>
       </div>
-      ${pessoasHtml||'<div style="font-size:12px;color:var(--t3);padding:8px 0">Nenhum gasto pendente este mês</div>'}
+      ${pessoasHtml||'<div style="font-size:12px;color:var(--t3);padding:8px 0">Nenhuma pendência</div>'}
     </div>`;
   }).filter(Boolean).join('');
 }
@@ -1892,7 +2110,7 @@ async function syncFromServer(){
     if(r2.ok){
       const rows=await r2.json();
       if(rows.length>0){
-        metas=rows.map(m=>({id:m.id,nome:m.nome,lim:parseFloat(m.lim),cat:m.cat,cor:m.cor,iniM:m.ini_m,iniY:m.ini_y,fimM:m.fim_m,fimY:m.fim_y}));
+        metas=rows.map(m=>({id:m.id,nome:m.nome,tipo:m.tipo||'teto',lim:m.lim?parseFloat(m.lim):null,cat:m.cat||null,cor:m.cor,iniM:m.ini_m,iniY:m.ini_y,fimM:m.fim_m,fimY:m.fim_y,totalObj:m.total_obj?parseFloat(m.total_obj):null,porMes:m.por_mes?parseFloat(m.por_mes):null}));
         localStorage.setItem('fluxo_metas3',JSON.stringify(metas));
       } else if(metas.length>0){
         for(const m of metas) await sbSaveMeta(m);
@@ -1961,7 +2179,7 @@ async function sbDeleteItem(id){
 // ── UPSERT meta ────────────────────────────────────────────
 async function sbSaveMeta(m){
   try{
-    const row={id:m.id,user_id:SB_UID,nome:m.nome,lim:m.lim,cat:m.cat,cor:m.cor,ini_m:m.iniM,ini_y:m.iniY,fim_m:m.fimM,fim_y:m.fimY};
+    const row={id:m.id,user_id:SB_UID,nome:m.nome,lim:m.lim||null,cat:m.cat||null,cor:m.cor,ini_m:m.iniM,ini_y:m.iniY,fim_m:m.fimM,fim_y:m.fimY,tipo:m.tipo||'teto',total_obj:m.totalObj||null,por_mes:m.porMes||null};
     await fetch(sbUrl('metas'),{method:'POST',headers:{...sbH(),'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(row)});
   }catch(e){console.warn('sbSaveMeta offline',e);}
 }
