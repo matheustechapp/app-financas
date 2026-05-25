@@ -633,7 +633,7 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
       </div>
     </div>
     <div class="field"><label>Responsável</label>
-      <select id="fResp"><option>Crédito</option><option>Débito</option><option>Família Brenda</option><option>Adicional</option></select>
+      <select id="fResp"><option>Crédito</option><option>Débito</option><option>Adicional</option></select>
     </div>
     <div class="field" id="fieldPessoa" style="display:none">
       <label>Pessoa (cobrança)</label>
@@ -768,10 +768,12 @@ function mesOpts(sm,sy,label=''){
 }
 
 // ── RENDER ─────────────────────────────────────────────────
+function isPessoaGasto(i){return i.tipo==='saida'&&!!i.pessoaId;}
 function render(){
   const items=getItems();
   const ent=items.filter(i=>i.tipo==='entrada').reduce((a,i)=>a+i.valor,0);
-  const sai=items.filter(i=>i.tipo==='saida').reduce((a,i)=>a+i.valor,0);
+  // saídas pessoais = excluindo gastos de terceiros
+  const sai=items.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i)).reduce((a,i)=>a+i.valor,0);
   const bal=ent-sai;
   ['mlHome','mlSemana','mlMetas'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=mStr(curM,curY);});
   document.getElementById('totE').textContent=fmt(ent);
@@ -785,7 +787,7 @@ function render(){
 
 // ── CHART ──────────────────────────────────────────────────
 function renderChart(items){
-  const saidas=items.filter(i=>i.tipo==='saida');
+  const saidas=items.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i));
   const total=saidas.reduce((a,i)=>a+i.valor,0);
   const bycat={};saidas.forEach(i=>{bycat[i.cat]=(bycat[i.cat]||0)+i.valor;});
   const sorted=Object.entries(bycat).sort((a,b)=>b[1]-a[1]).slice(0,6);
@@ -800,6 +802,9 @@ function renderChart(items){
 
 // ── LIST ───────────────────────────────────────────────────
 function renderList(items){
+  // build pessoa names map
+  const pessoaNomes={};
+  grupos.forEach(g=>g.pessoas.forEach(p=>{pessoaNomes[p.id]=p.nome;}));
   const IC={'Alimentação - Necessidade':'🍽','Alimentação - Saídas':'🍔','Mercantil':'🛒','Saúde':'💊','Assinaturas':'📱','Impostos':'🏛','Custo fixo':'🔒','Carro - Transporte':'🚗','Casa':'🏠','Presentes':'🎁','Viagem':'✈️','Estudos/Capacitação':'📚','Gastos Extras':'💸','Gastos dos Outros':'👥','Compras Pessoais':'🛍','Comunidade':'🤝','Maria Áurea':'👶','Doce Áurea':'🍫','Salário':'💼','Freelance':'💻','Investimentos':'📈','Fatura':'💳','Reembolso':'↩️','Anuidade':'🔖','Outros':'📌'};
   // populate category filter options
   const catSel=document.getElementById('filterCat');
@@ -825,10 +830,10 @@ function renderList(items){
   if(!fil.length){el.innerHTML=`<div class="empty">${hasFilters?'Nenhum resultado para os filtros':'Nenhum lançamento'}</div>`;return;}
   el.innerHTML=fil.map((item,idx)=>{
     const fd=item.fatM!==item.lanM||item.fatY!==item.lanY;
-    return `<div class="lanc" style="animation-delay:${idx*12}ms" onclick="editItem('${item.id}')">
-      <div class="lico ${item.tipo}">${IC[item.cat]||'📌'}</div>
-      <div class="lbody">
-        <div class="ldesc">${item.desc}</div>
+    return `<div class="lanc" id="li_${item.id}" style="animation-delay:${idx*12}ms">
+      <div class="lico ${item.tipo}" onclick="editItem('${item.id}')" style="cursor:pointer">${IC[item.cat]||'📌'}</div>
+      <div class="lbody" onclick="editItem('${item.id}')" style="cursor:pointer">
+        <div class="ldesc">${item.desc}${item.pessoaId?` <span style="font-size:9px;background:var(--bbg);color:var(--blue);border-radius:4px;padding:1px 5px;font-weight:700">${pessoaNomes[item.pessoaId]||''}</span>`:''}</div>
         <div class="ltags">
           <span class="tag">${item.cat}</span>
           ${item.pgto?`<span class="tag">${CARD_NAMES[item.pgto]||item.pgto}</span>`:''}
@@ -837,9 +842,12 @@ function renderList(items){
           ${item.recId?`<span class="tag rec">↺</span>`:''}
         </div>
       </div>
-      <div class="lright">
-        <div class="lval ${item.tipo}">${item.tipo==='entrada'?'+':'-'}${fmt(item.valor)}</div>
-        <div class="ldate">${fmtD(item.dataLanc)}</div>
+      <div class="lright" style="display:flex;align-items:center;gap:8px">
+        <div>
+          <div class="lval ${item.tipo}">${item.tipo==='entrada'?'+':'-'}${fmt(item.valor)}</div>
+          <div class="ldate">${fmtD(item.dataLanc)}</div>
+        </div>
+        <button onclick="deletarLancamento('${item.id}')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:15px;padding:4px;flex-shrink:0" title="Excluir">🗑</button>
       </div>
     </div>`;
   }).join('');
@@ -887,8 +895,8 @@ function renderSemana(){
 
   const items=getItems();
 
-  // comprometidos = saídas do mês que NÃO são fixos (alim/transp/merc)
-  const comprometidos=items.filter(i=>i.tipo==='saida'&&!CATS_FIXOS.includes(i.cat));
+  // comprometidos = saídas do mês que NÃO são fixos (alim/transp/merc) e NÃO são de terceiros
+  const comprometidos=items.filter(i=>i.tipo==='saida'&&!CATS_FIXOS.includes(i.cat)&&!isPessoaGasto(i));
   const totalComp=comprometidos.reduce((a,i)=>a+i.valor,0);
 
   // agrupado por categoria para exibição
@@ -997,7 +1005,7 @@ function renderSemana(){
 // ── HISTÓRICO ──────────────────────────────────────────────
 function renderHist(){
   // top categorias — todos os dados
-  const allSaidas=data.filter(i=>i.tipo==='saida');
+  const allSaidas=data.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i));
   const allByCat={};allSaidas.forEach(i=>{allByCat[i.cat]=(allByCat[i.cat]||0)+i.valor;});
   const topCats=Object.entries(allByCat).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const topMax=topCats[0]?.[1]||1;
@@ -1020,7 +1028,7 @@ function renderHist(){
   if(!sorted.length){el.innerHTML='<div class="empty">Nenhum dado ainda</div>';return;}
   el.innerHTML=sorted.map(([k,{m,y,items}],idx)=>{
     const ent=items.filter(i=>i.tipo==='entrada').reduce((a,i)=>a+i.valor,0);
-    const sai=items.filter(i=>i.tipo==='saida').reduce((a,i)=>a+i.valor,0);
+    const sai=items.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i)).reduce((a,i)=>a+i.valor,0);
     const bal=ent-sai;
     const byCat={};items.filter(i=>i.tipo==='saida').forEach(i=>{byCat[i.cat]=(byCat[i.cat]||0)+i.valor;});
     const cats=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
@@ -1464,7 +1472,10 @@ function renderPessoas(){
           <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:1px;margin-bottom:4px">RECEBIMENTOS</div>
           ${recebG.map(p=>`<div class="pessoa-pgto-item">
             <span class="pessoa-pgto-desc">${p.obs||'Pagamento'} · ${fmtD(p.data)}</span>
-            <span class="pessoa-pgto-val">+${fmt(p.valor)}</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="pessoa-pgto-val">+${fmt(p.valor)}</span>
+              <button onclick="deletarPgto('${p.id}')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px" title="Excluir">🗑</button>
+            </div>
           </div>`).join('')}
         </div>`:'';
         pessoasHtml=`<div class="pessoa-card">
@@ -1726,35 +1737,67 @@ function renderCartoes(){
   const sorted=Object.entries(byCard).sort((a,b)=>
     b[1].reduce((s,i)=>s+i.valor,0)-a[1].reduce((s,i)=>s+i.valor,0)
   );
-  const maxTotal=sorted[0]?sorted[0][1].reduce((s,i)=>s+i.valor,0):1;
   const el=document.getElementById('cartoesEl');
   if(!sorted.length){el.innerHTML='<div class="empty" style="padding:40px 0">Nenhum lançamento no mês</div>';return;}
+
+  // get pessoa names map
+  const pessoaNomes={};
+  grupos.forEach(g=>g.pessoas.forEach(p=>{pessoaNomes[p.id]=p.nome;}));
+
+  function lancamentoRow(i,showDelete=true){
+    const isPessoa=!!i.pessoaId;
+    const pessoaNome=isPessoa?(pessoaNomes[i.pessoaId]||'Pessoa'):null;
+    return `<div class="cartao-item" id="li_${i.id}">
+      <div style="flex:1;min-width:0;margin-right:8px">
+        <div class="cartao-item-desc">${i.desc}${pessoaNome?` <span style="font-size:9px;background:var(--bbg);color:var(--blue);border-radius:4px;padding:1px 5px;font-weight:700">${pessoaNome}</span>`:''}</div>
+        <div class="cartao-item-cat">${i.cat} · ${fmtD(i.dataLanc)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <div class="cartao-item-val">${fmt(i.valor)}</div>
+        ${showDelete?`<button onclick="deletarLancamento('${i.id}')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:14px;padding:2px" title="Excluir">🗑</button>`:''}
+      </div>
+    </div>`;
+  }
+
   el.innerHTML=sorted.map(([card,lancamentos],idx)=>{
-    const total=lancamentos.reduce((s,i)=>s+i.valor,0);
-    const pct=Math.round(total/maxTotal*100);
     const cor=CARD_COLORS[card]||'var(--blue)';
     const nome=CARD_NAMES[card]||card;
-    const sortedL=[...lancamentos].sort((a,b)=>b.valor-a.valor);
-    const top5=sortedL.slice(0,5);
-    const resto=sortedL.slice(5);
+    const pessoais=lancamentos.filter(i=>!isPessoaGasto(i)).sort((a,b)=>b.valor-a.valor);
+    const terceiros=lancamentos.filter(i=>isPessoaGasto(i)).sort((a,b)=>b.valor-a.valor);
+    const totalPessoal=pessoais.reduce((s,i)=>s+i.valor,0);
+    const totalTerceiros=terceiros.reduce((s,i)=>s+i.valor,0);
+    const totalGeral=totalPessoal+totalTerceiros;
+
     return `<div class="cartao-card" style="animation-delay:${idx*60}ms">
       <div class="cartao-header">
         <div>
           <div class="cartao-nome" style="color:${cor}">${nome}</div>
           <div style="font-size:10px;color:var(--t3);margin-top:2px;font-weight:600">${lancamentos.length} lançamentos</div>
         </div>
-        <div class="cartao-total">${fmt(total)}</div>
+        <div class="cartao-total">${fmt(totalGeral)}</div>
       </div>
-      <div class="cartao-bar-wrap"><div class="cartao-bar" style="width:${pct}%;background:${cor}"></div></div>
+      <div class="cartao-bar-wrap">
+        <div style="height:4px;display:flex;border-radius:2px;overflow:hidden">
+          <div style="width:${totalGeral>0?Math.round(totalPessoal/totalGeral*100):0}%;background:${cor};transition:width .5s"></div>
+          <div style="flex:1;background:var(--bbg)"></div>
+        </div>
+      </div>
       <div class="cartao-items">
-        ${top5.map(i=>`<div class="cartao-item">
-          <div><div class="cartao-item-desc">${i.desc}</div><div class="cartao-item-cat">${i.cat}</div></div>
-          <div class="cartao-item-val">${fmt(i.valor)}</div>
-        </div>`).join('')}
-        ${resto.length?`<button class="cartao-ver-mais" onclick="this.previousElementSibling && this.style.display='none'" 
-          onclick="toggleCartaoResto(this,${JSON.stringify(resto.map(i=>({desc:i.desc,cat:i.cat,valor:i.valor})))})">
-          +${resto.length} lançamentos
-        </button>`:''}
+        ${pessoais.length?`
+          <div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;display:flex;justify-content:space-between">
+            <span>Gastos Pessoais</span><span>${fmt(totalPessoal)}</span>
+          </div>
+          ${pessoais.map(i=>lancamentoRow(i)).join('')}`:''}
+        ${terceiros.length?`
+          <div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:var(--blue);letter-spacing:1.5px;text-transform:uppercase;display:flex;justify-content:space-between;border-top:1px solid var(--b);margin-top:4px">
+            <span>Gastos de Terceiros</span><span>${fmt(totalTerceiros)}</span>
+          </div>
+          ${terceiros.map(i=>lancamentoRow(i)).join('')}`:''}
+        ${pessoais.length&&terceiros.length?`
+          <div style="padding:8px 16px;border-top:1px solid var(--b);display:flex;justify-content:space-between;margin-top:2px">
+            <span style="font-size:12px;font-weight:700;color:var(--t)">Subtotal fatura</span>
+            <span style="font-size:13px;font-weight:800;color:var(--red);font-family:'Manrope',sans-serif">${fmt(totalGeral)}</span>
+          </div>`:''}
       </div>
     </div>`;
   }).join('');
@@ -1763,6 +1806,26 @@ function renderCartoes(){
 function save(item=null){
   localStorage.setItem('fluxo_v3',JSON.stringify(data));
   if(item) sbSaveItem(item);
+}
+
+async function deletarLancamento(id){
+  if(!confirm('Excluir este lançamento?'))return;
+  data=data.filter(i=>i.id!==id);
+  save();
+  try{await fetch(sbUrl('lancamentos',`?id=eq.${id}`),{method:'DELETE',headers:sbH()});}catch(e){}
+  // remove from UI without full re-render if possible
+  const el=document.getElementById('li_'+id);
+  if(el)el.remove();
+  render();
+  showToast('Lançamento excluído');
+}
+
+async function deletarPgto(pgtoId){
+  if(!confirm('Excluir este recebimento?'))return;
+  pgtos_pessoas=pgtos_pessoas.filter(p=>p.id!==pgtoId);
+  savePgtosPessoas();
+  renderPessoas();
+  showToast('Recebimento excluído');
 }
 let _tt;
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2500);}
