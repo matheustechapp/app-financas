@@ -1102,6 +1102,7 @@ function chM(d){
   applyRecs();
   const activeScreen=document.querySelector('.screen.active')?.id;
   if(activeScreen==='screen-cartoes')renderCartoes();
+  else if(activeScreen==='screen-pessoas')renderPessoas();
   else render();
 }
 
