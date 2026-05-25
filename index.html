@@ -241,7 +241,43 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.lanc,.hist-month,.meta-card,.cartao-card{animation:fu .2s ease both}
+.lanc,.hist-month,.meta-card,.cartao-card,.pessoa-card{animation:fu .2s ease both}
+
+/* PESSOAS */
+.grupo-section{margin-bottom:20px}
+.grupo-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.grupo-nome{font-size:13px;font-weight:800;color:var(--t);font-family:'Manrope',sans-serif;letter-spacing:-.2px}
+.grupo-total{font-size:12px;font-weight:700;color:var(--red);font-family:'Manrope',sans-serif}
+.pessoa-card{background:var(--bg2);border-radius:var(--r);margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow)}
+.pessoa-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer}
+.pessoa-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;margin-right:10px;font-family:'Manrope',sans-serif}
+.pessoa-info{flex:1;min-width:0}
+.pessoa-nome{font-size:13px;font-weight:700;color:var(--t)}
+.pessoa-sub{font-size:10px;color:var(--t3);margin-top:1px;font-weight:500}
+.pessoa-deve{text-align:right}
+.pessoa-deve-val{font-size:14px;font-weight:800;font-family:'Manrope',sans-serif}
+.pessoa-deve-val.positivo{color:var(--red)}
+.pessoa-deve-val.quitado{color:var(--green)}
+.pessoa-deve-label{font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.pessoa-body{display:none;border-top:1px solid var(--b)}
+.pessoa-body.open{display:block}
+.pessoa-gastos{padding:8px 0}
+.pessoa-gasto-item{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--b)}
+.pessoa-gasto-item:last-child{border-bottom:none}
+.pessoa-gasto-desc{font-size:12px;font-weight:500;color:var(--t)}
+.pessoa-gasto-meta{font-size:10px;color:var(--t3);margin-top:1px}
+.pessoa-gasto-val{font-size:12px;font-weight:700;color:var(--red);font-family:'Manrope',sans-serif}
+.pessoa-pgtos{background:var(--gbg);padding:8px 16px}
+.pessoa-pgto-item{display:flex;justify-content:space-between;padding:4px 0;font-size:11px}
+.pessoa-pgto-desc{color:var(--t2);font-weight:500}
+.pessoa-pgto-val{color:var(--green);font-weight:700;font-family:'Manrope',sans-serif}
+.pessoa-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 16px 14px}
+.btn-receber{background:var(--green);border:none;border-radius:var(--rs);padding:9px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;color:#fff;cursor:pointer}
+.btn-add-gasto{background:var(--bbg);border:1px solid var(--blue);border-radius:var(--rs);padding:9px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;color:var(--blue);cursor:pointer}
+.add-grupo-btn{width:100%;background:none;border:2px dashed var(--b2);border-radius:var(--r);padding:12px;font-size:12px;color:var(--t3);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:600;box-shadow:var(--shadow);background:var(--bg2)}
+.pessoas-mnav{display:flex;gap:6px;margin-bottom:14px}
+.pessoas-tab{flex:1;padding:8px;border-radius:var(--rs);border:1.5px solid var(--b2);background:var(--bg2);font-size:11px;font-weight:700;color:var(--t3);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-align:center}
+.pessoas-tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
 
 /* DARK MODE */
 body.dark{
@@ -494,6 +530,28 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
   </div>
 </div>
 
+<!-- PESSOAS -->
+<div class="screen" id="screen-pessoas">
+  <div class="topbar">
+    <div class="t-title">Pessoas</div>
+    <div class="mnav">
+      <button onclick="chM(-1)">‹</button>
+      <span class="ml" id="mlPessoas">–</span>
+      <button onclick="chM(1)">›</button>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="sec">
+      <div class="pessoas-mnav">
+        <button class="pessoas-tab active" onclick="setPessoasTab('pendente',this)">A receber</button>
+        <button class="pessoas-tab" onclick="setPessoasTab('historico',this)">Histórico</button>
+      </div>
+      <div id="pessoasEl"></div>
+      <button class="add-grupo-btn" onclick="openGrupoModal()">+ Novo grupo / pessoa</button>
+    </div>
+  </div>
+</div>
+
 <!-- CONFIG -->
 <div class="screen" id="screen-cfg">
   <div class="topbar"><div class="t-title">Configurações</div></div>
@@ -538,6 +596,10 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
     <span>Cartões</span>
   </button>
+  <button class="nbtn" id="nav-pessoas" onclick="goTo('pessoas')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>Pessoas</span>
+  </button>
   <button class="nbtn" id="nav-cfg" onclick="goTo('cfg')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     <span>Config</span>
@@ -572,6 +634,10 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
     </div>
     <div class="field"><label>Responsável</label>
       <select id="fResp"><option>Crédito</option><option>Débito</option><option>Família Brenda</option><option>Adicional</option></select>
+    </div>
+    <div class="field" id="fieldPessoa" style="display:none">
+      <label>Pessoa (cobrança)</label>
+      <select id="fPessoa"><option value="">— nenhuma —</option></select>
     </div>
     <div class="tog-row">
       <div><div class="tl">Recorrente</div><div class="ts">Repete todo mês</div></div>
@@ -616,6 +682,57 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- MODAL GRUPO/PESSOA -->
+<div class="mbg" id="mbgGrupo" onclick="closeGrupoBg(event)">
+  <div class="modal">
+    <div class="m-handle"></div>
+    <div class="m-title" id="grupoModalTitle">Novo Grupo</div>
+    <div class="field"><label>Nome do grupo</label><input type="text" id="gNomeGrupo" placeholder="Ex: Família Brenda, Minha Família..."></div>
+    <div class="tog-row" style="margin-bottom:14px">
+      <div>
+        <div class="tl">Cobrança em grupo</div>
+        <div class="ts">Receber o total de uma vez pelo grupo</div>
+      </div>
+      <div class="tog" id="togCobrarGrupo" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;letter-spacing:1.5px;color:var(--t3);text-transform:uppercase;font-weight:700;margin-bottom:8px">Pessoas no grupo</div>
+      <div id="gPessoasList"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input type="text" id="gNovaPessoa" placeholder="Nome da pessoa..." style="flex:1;background:var(--bg3);border:1.5px solid var(--b);border-radius:var(--rs);padding:8px 10px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;color:var(--t);outline:none">
+        <button onclick="addPessoaToGrupo()" style="background:var(--blue);border:none;border-radius:var(--rs);padding:8px 14px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">+</button>
+      </div>
+    </div>
+    <input type="hidden" id="gEditId">
+    <div class="m-actions">
+      <button class="btn-c" onclick="closeGrupoModal()">Cancelar</button>
+      <button class="btn-s" onclick="salvarGrupo()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RECEBIMENTO -->
+<div class="mbg" id="mbgReceber" onclick="closeReceberBg(event)">
+  <div class="modal">
+    <div class="m-handle"></div>
+    <div class="m-title">Registrar Recebimento</div>
+    <div style="background:var(--bg3);border-radius:var(--rs);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--t2)">
+      Pessoa: <strong id="receberPessoaNome" style="color:var(--t)"></strong><br>
+      Deve: <strong id="receberPessoaDeve" style="color:var(--red)"></strong>
+    </div>
+    <div class="fr2">
+      <div class="field"><label>Valor recebido</label><input type="number" id="rValor" placeholder="0,00" inputmode="decimal"></div>
+      <div class="field"><label>Data</label><input type="date" id="rData"></div>
+    </div>
+    <div class="field"><label>Observação (opcional)</label><input type="text" id="rObs" placeholder="Ex: Pix, transferência..."></div>
+    <input type="hidden" id="rPessoaId">
+    <div class="m-actions">
+      <button class="btn-c" onclick="closeReceberModal()">Cancelar</button>
+      <button class="btn-s" onclick="salvarRecebimento()">Confirmar</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ── CONSTANTS ──────────────────────────────────────────────
@@ -967,6 +1084,7 @@ function goTo(s){
   document.getElementById('nav-'+s)?.classList.add('active');
   document.getElementById('fab').style.display=(s==='home'?'flex':'none');
   if(s==='cartoes')renderCartoes();
+  else if(s==='pessoas')renderPessoas();
   else render();
 }
 
@@ -1005,6 +1123,9 @@ function openModal(){
   document.getElementById('fFatura').innerHTML=mesOpts(curM,curY,'— mesmo mês —');
   document.getElementById('fRecIni').innerHTML=mesOpts(curM,curY);
   document.getElementById('fRecFim').innerHTML=`<option value="">Indefinido</option>`+mesOpts(null,null);
+  populatePessoaSelect();
+  document.getElementById('fieldPessoa').style.display=curTipo==='saida'?'block':'none';
+  document.getElementById('fPessoa').value='';
   document.getElementById('mbg').classList.add('open');
   setTimeout(()=>document.getElementById('fDesc').focus(),350);
 }
@@ -1034,6 +1155,9 @@ function setTipo(t){
   document.getElementById('btnS').className='tbtn'+(t==='saida'?' as':'');
   const cats=t==='entrada'?CE:CS;
   document.getElementById('fCat').innerHTML=cats.map(c=>`<option>${c}</option>`).join('');
+  // show pessoa field only for saida
+  const fp=document.getElementById('fieldPessoa');
+  if(fp)fp.style.display=t==='saida'?'block':'none';
 }
 
 function toggleRec(){
@@ -1060,7 +1184,8 @@ function salvar(){
   if(fatSel){const p=fatSel.split('-');fatM=parseInt(p[0]);fatY=parseInt(p[1]);}
   const editId=document.getElementById('editId').value;
   const isRec=document.getElementById('togRec').classList.contains('on');
-  const item={id:editId||Date.now().toString(),tipo:curTipo,desc,det:document.getElementById('fDet').value.trim(),valor:parseFloat(val.toFixed(2)),dataLanc,lanM,lanY,fatM,fatY,cat:document.getElementById('fCat').value,pgto:document.getElementById('fPgto').value,resp:document.getElementById('fResp').value,recId:null};
+  const pessoaId=document.getElementById('fPessoa')?.value||null;
+  const item={id:editId||Date.now().toString(),tipo:curTipo,desc,det:document.getElementById('fDet').value.trim(),valor:parseFloat(val.toFixed(2)),dataLanc,lanM,lanY,fatM,fatY,cat:document.getElementById('fCat').value,pgto:document.getElementById('fPgto').value,resp:document.getElementById('fResp').value,pessoaId:pessoaId||null,recId:null};
   if(editId){data=data.map(i=>i.id===editId?item:i);}else{data.push(item);}
   if(isRec&&!editId){
     const ip=(document.getElementById('fRecIni').value||`${curM}-${curY}`).split('-');
@@ -1252,6 +1377,320 @@ function _parseCsv(text){
   save();showToast(`${count} registros importados!`);render();sbBatchUpsert(data.slice(-count));
 }
 function clearAll(){if(!confirm('Apagar tudo?'))return;data=[];metas=[];recs=[];wsetup={};['fluxo_v3','fluxo_metas3','fluxo_recs3','fluxo_wsetup'].forEach(k=>localStorage.removeItem(k));render();showToast('Dados apagados');}
+// ── PESSOAS STATE ──────────────────────────────────────────
+let grupos=JSON.parse(localStorage.getItem('fp_grupos')||'[]');
+let pgtos_pessoas=JSON.parse(localStorage.getItem('fp_pgtos_pessoas')||'[]');
+let pessoasTab='pendente';
+let gTempPessoas=[];
+
+const AVATAR_COLORS=['#3B6CF4','#00B37E','#E53E3E','#D97706','#7C3AED','#0891B2','#DB2777','#059669'];
+
+function setPessoasTab(tab,btn){
+  pessoasTab=tab;
+  document.querySelectorAll('.pessoas-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPessoas();
+}
+
+function saveGrupos(){
+  localStorage.setItem('fp_grupos',JSON.stringify(grupos));
+  sbSaveGrupos();
+}
+function savePgtosPessoas(){
+  localStorage.setItem('fp_pgtos_pessoas',JSON.stringify(pgtos_pessoas));
+  sbSavePgtosPessoas();
+}
+async function sbSaveGrupos(){
+  try{
+    await fetch(sbUrl('fp_grupos'),{method:'POST',headers:{...sbH(),'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({id:'grupos_'+SB_UID,user_id:SB_UID,dados:grupos})});
+  }catch(e){}
+}
+async function sbSavePgtosPessoas(){
+  try{
+    await fetch(sbUrl('fp_configs'),{method:'POST',headers:{...sbH(),'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({id:'pgtos_'+SB_UID,user_id:SB_UID,chave:'pgtos_pessoas',dados:pgtos_pessoas})});
+  }catch(e){}
+}
+
+// pessoas do mês = gastos com campo pessoa preenchido
+function getGastosComPessoa(pessoaId, m, y){
+  const mm=m??curM, yy=y??curY;
+  return data.filter(i=>i.tipo==='saida'&&i.pessoaId===pessoaId&&i.fatM===mm&&i.fatY===yy);
+}
+function getGastosGrupo(grupo, m, y){
+  // para grupos com cobrança em grupo, busca por resp=nome do grupo ou por pessoaId das pessoas do grupo
+  const mm=m??curM, yy=y??curY;
+  const pessoaIds=grupo.pessoas.map(p=>p.id);
+  return data.filter(i=>i.tipo==='saida'&&i.fatM===mm&&i.fatY===yy&&
+    (i.resp===grupo.nome||pessoaIds.includes(i.pessoaId)));
+}
+function getPgtosRecebidos(pessoaId, m, y){
+  const mm=m??curM, yy=y??curY;
+  return pgtos_pessoas.filter(p=>p.pessoaId===pessoaId&&p.fatM===mm&&p.fatY===yy);
+}
+function getPgtosGrupo(grupoId, m, y){
+  const mm=m??curM, yy=y??curY;
+  return pgtos_pessoas.filter(p=>p.pessoaId==='grupo_'+grupoId&&p.fatM===mm&&p.fatY===yy);
+}
+
+function renderPessoas(){
+  const mlEl=document.getElementById('mlPessoas');
+  if(mlEl)mlEl.textContent=mStr(curM,curY);
+  const el=document.getElementById('pessoasEl');
+  if(!el)return;
+  if(!grupos.length){
+    el.innerHTML='<div class="empty" style="padding:32px 0">Nenhum grupo cadastrado</div>';
+    return;
+  }
+  el.innerHTML=grupos.map((grupo,gi)=>{
+    // For cobrarGrupo, show a single group view instead of per-person
+    let pessoasHtml='';
+    if(grupo.cobrarGrupo){
+      const gastosG=getGastosGrupo(grupo);
+      const totalGastoG=gastosG.reduce((a,i)=>a+i.valor,0);
+      const recebG=getPgtosGrupo(grupo.id);
+      const totalRecebG=recebG.reduce((a,p)=>a+p.valor,0);
+      const deveG=Math.max(0,totalGastoG-totalRecebG);
+      if(pessoasTab==='pendente'&&totalGastoG===0){pessoasHtml='';}
+      else {
+        const gastosHtmlG=gastosG.map(g=>`
+          <div class="pessoa-gasto-item">
+            <div><div class="pessoa-gasto-desc">${g.desc}</div>
+            <div class="pessoa-gasto-meta">${g.cat} · ${fmtD(g.dataLanc)}</div></div>
+            <div class="pessoa-gasto-val">${fmt(g.valor)}</div>
+          </div>`).join('');
+        const pgtoHtmlG=recebG.length?`<div class="pessoa-pgtos">
+          <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:1px;margin-bottom:4px">RECEBIMENTOS</div>
+          ${recebG.map(p=>`<div class="pessoa-pgto-item">
+            <span class="pessoa-pgto-desc">${p.obs||'Pagamento'} · ${fmtD(p.data)}</span>
+            <span class="pessoa-pgto-val">+${fmt(p.valor)}</span>
+          </div>`).join('')}
+        </div>`:'';
+        pessoasHtml=`<div class="pessoa-card">
+          <div class="pessoa-head" onclick="togglePessoa('grp${gi}')">
+            <div class="pessoa-avatar" style="background:var(--blue)">G</div>
+            <div class="pessoa-info">
+              <div class="pessoa-nome">${grupo.nome}</div>
+              <div class="pessoa-sub">${gastosG.length} gasto${gastosG.length!==1?'s':''} · recebido ${fmt(totalRecebG)}</div>
+            </div>
+            <div class="pessoa-deve">
+              <div class="pessoa-deve-val ${deveG>0?'positivo':'quitado'}">${deveG>0?fmt(deveG):'Quitado'}</div>
+              <div class="pessoa-deve-label">${deveG>0?'a receber':'em dia'}</div>
+            </div>
+          </div>
+          <div class="pessoa-body" id="grp${gi}">
+            <div class="pessoa-gastos">${gastosHtmlG||'<div style="padding:12px 16px;font-size:12px;color:var(--t3)">Nenhum gasto este mês</div>'}</div>
+            ${pgtoHtmlG}
+          </div>
+        </div>`;
+      }
+    } else {
+    pessoasHtml=grupo.pessoas.map((pessoa,pi)=>{
+      const gastos=getGastosComPessoa(pessoa.id);
+      const totalGasto=gastos.reduce((a,i)=>a+i.valor,0);
+      const recebidos=getPgtosRecebidos(pessoa.id);
+      const totalRecebido=recebidos.reduce((a,p)=>a+p.valor,0);
+      const deve=Math.max(0,totalGasto-totalRecebido);
+      const cor=AVATAR_COLORS[(gi*3+pi)%AVATAR_COLORS.length];
+      const inicial=pessoa.nome.charAt(0).toUpperCase();
+
+      if(pessoasTab==='pendente'&&totalGasto===0)return '';
+
+      const gastosHtml=gastos.map(g=>`
+        <div class="pessoa-gasto-item">
+          <div><div class="pessoa-gasto-desc">${g.desc}</div>
+          <div class="pessoa-gasto-meta">${g.cat} · ${fmtD(g.dataLanc)}</div></div>
+          <div class="pessoa-gasto-val">${fmt(g.valor)}</div>
+        </div>`).join('');
+
+      const pgtoHtml=recebidos.length?`<div class="pessoa-pgtos">
+        <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:1px;margin-bottom:4px">RECEBIMENTOS</div>
+        ${recebidos.map(p=>`<div class="pessoa-pgto-item">
+          <span class="pessoa-pgto-desc">${p.obs||'Pagamento'} · ${fmtD(p.data)}</span>
+          <span class="pessoa-pgto-val">+${fmt(p.valor)}</span>
+        </div>`).join('')}
+      </div>`:'';
+
+      return `<div class="pessoa-card">
+        <div class="pessoa-head" onclick="togglePessoa('p${gi}_${pi}')">
+          <div class="pessoa-avatar" style="background:${cor}">${inicial}</div>
+          <div class="pessoa-info">
+            <div class="pessoa-nome">${pessoa.nome}</div>
+            <div class="pessoa-sub">${gastos.length} gasto${gastos.length!==1?'s':''} · recebido ${fmt(totalRecebido)}</div>
+          </div>
+          <div class="pessoa-deve">
+            <div class="pessoa-deve-val ${deve>0?'positivo':'quitado'}">${deve>0?fmt(deve):'Quitado'}</div>
+            <div class="pessoa-deve-label">${deve>0?'a receber':'em dia'}</div>
+          </div>
+        </div>
+        <div class="pessoa-body" id="p${gi}_${pi}">
+          <div class="pessoa-gastos">${gastosHtml||'<div style="padding:12px 16px;font-size:12px;color:var(--t3)">Nenhum gasto este mês</div>'}</div>
+          ${pgtoHtml}
+          <div class="pessoa-actions">
+            <button class="btn-receber" onclick="openReceberModal('${pessoa.id}','${pessoa.nome}',${deve})">↓ Registrar recebimento</button>
+            <button class="btn-add-gasto" onclick="openModalParaPessoa('${pessoa.id}','${pessoa.nome}')">+ Novo gasto</button>
+          </div>
+        </div>
+      </div>`;
+    }).filter(Boolean).join('');
+    } // end else cobrarGrupo
+
+    if(pessoasTab==='pendente'&&!pessoasHtml.trim())return '';
+
+    let totalGrupo=0;
+    if(grupo.cobrarGrupo){
+      const gastosG=getGastosGrupo(grupo).reduce((a,i)=>a+i.valor,0);
+      const recebG=getPgtosGrupo(grupo.id).reduce((a,p)=>a+p.valor,0);
+      totalGrupo=Math.max(0,gastosG-recebG);
+    } else {
+      totalGrupo=grupo.pessoas.reduce((a,p)=>{
+        const g=getGastosComPessoa(p.id).reduce((s,i)=>s+i.valor,0);
+        const r=getPgtosRecebidos(p.id).reduce((s,pg)=>s+pg.valor,0);
+        return a+Math.max(0,g-r);
+      },0);
+    }
+
+    return `<div class="grupo-section">
+      <div class="grupo-header">
+        <div>
+          <div class="grupo-nome">${grupo.nome}</div>
+          ${grupo.cobrarGrupo?'<div style="font-size:10px;color:var(--t3);font-weight:600;margin-top:1px">Cobrança em grupo</div>':'<div style="font-size:10px;color:var(--t3);font-weight:600;margin-top:1px">Cobrança individual</div>'}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${totalGrupo>0?`<div class="grupo-total">${fmt(totalGrupo)}</div>`:'<div style="font-size:11px;color:var(--green);font-weight:700">Quitado</div>'}
+          ${grupo.cobrarGrupo&&totalGrupo>0?`<button onclick="openReceberGrupoModal('${grupo.id}','${grupo.nome}',${totalGrupo})" style="background:var(--green);border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:#fff;cursor:pointer">↓ Receber</button>`:''}
+          <button onclick="openGrupoModal('${grupo.id}')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px;padding:2px">✏️</button>
+        </div>
+      </div>
+      ${pessoasHtml||'<div style="font-size:12px;color:var(--t3);padding:8px 0">Nenhum gasto pendente este mês</div>'}
+    </div>`;
+  }).filter(Boolean).join('');
+}
+
+function togglePessoa(id){
+  const el=document.getElementById(id);
+  if(el)el.classList.toggle('open');
+}
+
+// ── GRUPO MODAL ─────────────────────────────────────────────
+function openGrupoModal(editId=null){
+  gTempPessoas=[];
+  document.getElementById('gEditId').value=editId||'';
+  document.getElementById('gNovaPessoa').value='';
+  const tog=document.getElementById('togCobrarGrupo');
+  if(editId){
+    const g=grupos.find(g=>g.id===editId);
+    if(g){
+      document.getElementById('gNomeGrupo').value=g.nome;
+      document.getElementById('grupoModalTitle').textContent='Editar Grupo';
+      gTempPessoas=[...g.pessoas];
+      if(g.cobrarGrupo)tog.classList.add('on'); else tog.classList.remove('on');
+    }
+  } else {
+    document.getElementById('gNomeGrupo').value='';
+    document.getElementById('grupoModalTitle').textContent='Novo Grupo';
+    tog.classList.remove('on');
+  }
+  renderGrupoPessoas();
+  document.getElementById('mbgGrupo').classList.add('open');
+}
+function renderGrupoPessoas(){
+  document.getElementById('gPessoasList').innerHTML=gTempPessoas.map((p,i)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:var(--rs);padding:8px 12px;margin-bottom:6px">
+      <span style="font-size:13px;font-weight:500">${p.nome}</span>
+      <button onclick="removePessoaFromGrupo(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">×</button>
+    </div>`).join('');
+}
+function addPessoaToGrupo(){
+  const nome=document.getElementById('gNovaPessoa').value.trim();
+  if(!nome)return;
+  gTempPessoas.push({id:'p'+Date.now(),nome});
+  document.getElementById('gNovaPessoa').value='';
+  renderGrupoPessoas();
+}
+function removePessoaFromGrupo(idx){
+  gTempPessoas.splice(idx,1);
+  renderGrupoPessoas();
+}
+function closeGrupoModal(){document.getElementById('mbgGrupo').classList.remove('open');}
+function closeGrupoBg(e){if(e.target===document.getElementById('mbgGrupo'))closeGrupoModal();}
+function salvarGrupo(){
+  const nome=document.getElementById('gNomeGrupo').value.trim();
+  if(!nome){showToast('Informe o nome do grupo');return;}
+  const editId=document.getElementById('gEditId').value;
+  const cobrarGrupo=document.getElementById('togCobrarGrupo').classList.contains('on');
+  if(editId){
+    const idx=grupos.findIndex(g=>g.id===editId);
+    if(idx>=0)grupos[idx]={...grupos[idx],nome,pessoas:gTempPessoas,cobrarGrupo};
+  } else {
+    grupos.push({id:'g'+Date.now(),nome,pessoas:gTempPessoas,cobrarGrupo});
+  }
+  saveGrupos();
+  closeGrupoModal();
+  renderPessoas();
+  populatePessoaSelect();
+  showToast('Grupo salvo!');
+}
+
+// ── RECEBIMENTO MODAL ───────────────────────────────────────
+function openReceberModal(pessoaId,pessoaNome,deve){
+  document.getElementById('rPessoaId').value=pessoaId;
+  document.getElementById('receberPessoaNome').textContent=pessoaNome;
+  document.getElementById('receberPessoaDeve').textContent=fmt(deve);
+  document.getElementById('rValor').value=deve>0?deve.toFixed(2):'';
+  document.getElementById('rData').value=new Date().toISOString().split('T')[0];
+  document.getElementById('rObs').value='';
+  document.getElementById('mbgReceber').classList.add('open');
+}
+function closeReceberModal(){document.getElementById('mbgReceber').classList.remove('open');}
+function closeReceberBg(e){if(e.target===document.getElementById('mbgReceber'))closeReceberModal();}
+
+function openReceberGrupoModal(grupoId,grupoNome,totalDeve){
+  // registra como recebimento do grupo (usa grupoId como pessoaId especial)
+  document.getElementById('rPessoaId').value='grupo_'+grupoId;
+  document.getElementById('receberPessoaNome').textContent=grupoNome+' (grupo)';
+  document.getElementById('receberPessoaDeve').textContent=fmt(totalDeve);
+  document.getElementById('rValor').value=totalDeve.toFixed(2);
+  document.getElementById('rData').value=new Date().toISOString().split('T')[0];
+  document.getElementById('rObs').value='';
+  document.getElementById('mbgReceber').classList.add('open');
+}
+function salvarRecebimento(){
+  const pessoaId=document.getElementById('rPessoaId').value;
+  const valor=parseFloat(document.getElementById('rValor').value);
+  const data_r=document.getElementById('rData').value;
+  if(!valor||valor<=0){showToast('Informe o valor recebido');return;}
+  pgtos_pessoas.push({
+    id:'pg'+Date.now(),pessoaId,valor,data:data_r,
+    obs:document.getElementById('rObs').value.trim(),
+    fatM:curM,fatY:curY
+  });
+  savePgtosPessoas();
+  closeReceberModal();
+  renderPessoas();
+  showToast('Recebimento registrado!');
+}
+
+// ── ABRIR MODAL PRÉ-PREENCHIDO PARA PESSOA ─────────────────
+function openModalParaPessoa(pessoaId,pessoaNome){
+  openModal();
+  setTimeout(()=>{
+    const sel=document.getElementById('fPessoa');
+    if(sel)sel.value=pessoaId;
+    document.getElementById('fieldPessoa').style.display='block';
+  },100);
+}
+
+// ── POPULATE PESSOA SELECT NO MODAL ────────────────────────
+function populatePessoaSelect(){
+  const sel=document.getElementById('fPessoa');
+  if(!sel)return;
+  const todasPessoas=grupos.flatMap(g=>g.pessoas.map(p=>({...p,grupo:g.nome})));
+  sel.innerHTML='<option value="">— nenhuma —</option>'+
+    todasPessoas.map(p=>`<option value="${p.id}">${p.nome} (${p.grupo})</option>`).join('');
+}
+
 // ── THEME ──────────────────────────────────────────────────
 const CARD_NAMES={'C6':'Cartão C6 Bank','Inter':'Cartão Inter','XP':'Cartão XP','TAP':'Cartão Azul Platinum','Nubank':'Cartão Nubank'};
 const CARD_COLORS={'C6':'#F7B731','Inter':'#FF6B35','XP':'#1A1A2E','TAP':'#0066CC','Nubank':'#8A05BE'};
@@ -1328,7 +1767,7 @@ const sbH=()=>({'apikey':SB_KEY,'Authorization':'Bearer '+(SB_TOKEN||SB_KEY),'Co
 const sbUrl=(table,qs='')=>`${SB_URL}/rest/v1/${table}${qs}`;
 
 // converte item local → linha supabase
-function toRow(i){return{id:i.id,user_id:SB_UID,tipo:i.tipo,descricao:i.desc,det:i.det||'',valor:i.valor,data_lanc:i.dataLanc||'',lan_m:i.lanM,lan_y:i.lanY,fat_m:i.fatM,fat_y:i.fatY,cat:i.cat||'',pgto:i.pgto||'',resp:i.resp||'',rec_id:i.recId||null};}
+function toRow(i){return{id:i.id,user_id:SB_UID,tipo:i.tipo,descricao:i.desc,det:i.det||'',valor:i.valor,data_lanc:i.dataLanc||'',lan_m:i.lanM,lan_y:i.lanY,fat_m:i.fatM,fat_y:i.fatY,cat:i.cat||'',pgto:i.pgto||'',resp:i.resp||'',rec_id:i.recId||null,pessoa_id:i.pessoaId||null};}
 // converte linha supabase → item local
 function fromRow(r){return{id:r.id,tipo:r.tipo,desc:r.descricao,det:r.det||'',valor:parseFloat(r.valor),dataLanc:r.data_lanc||'',lanM:r.lan_m,lanY:r.lan_y,fatM:r.fat_m,fatY:r.fat_y,cat:r.cat||'',pgto:r.pgto||'',resp:r.resp||'',recId:r.rec_id||null};}
 
@@ -1381,6 +1820,21 @@ async function syncFromServer(){
         for(const [k,v] of Object.entries(wsetup)) await sbSaveWsetup(k,v);
       }
     }
+    // grupos e pgtos pessoas (stored in wsetup-like table)
+    try{
+      const rg=await fetch(sbUrl('fp_configs',`?user_id=eq.${SB_UID}&select=*`),{headers:sbH()});
+      if(rg.ok){
+        const rows=await rg.json();
+        const pg=rows.find(r=>r.chave==='pgtos_pessoas');
+        if(pg&&pg.dados){pgtos_pessoas=pg.dados;localStorage.setItem('fp_pgtos_pessoas',JSON.stringify(pgtos_pessoas));}
+      }
+      const rgg=await fetch(sbUrl('fp_grupos',`?user_id=eq.${SB_UID}&select=*`),{headers:sbH()});
+      if(rgg.ok){
+        const rows=await rgg.json();
+        if(rows.length>0){grupos=rows[0].dados||[];localStorage.setItem('fp_grupos',JSON.stringify(grupos));}
+      }
+    }catch(e){}
+    populatePessoaSelect();
     applyRecs();render();
     showToast('Sincronizado!');
   }catch(err){
@@ -1488,6 +1942,8 @@ async function doLogout(){
 
 // ── INIT ───────────────────────────────────────────────────
 // restaura tema
+grupos=JSON.parse(localStorage.getItem('fp_grupos')||'[]');
+pgtos_pessoas=JSON.parse(localStorage.getItem('fp_pgtos_pessoas')||'[]');
 const savedTheme=localStorage.getItem('fp_theme');
 if(savedTheme==='dark'){document.body.classList.add('dark');const tb=document.getElementById('themeBtn');if(tb)tb.textContent='☀️';}
 
