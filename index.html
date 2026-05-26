@@ -939,20 +939,23 @@ function renderSemana(){
   const CATS_FIXOS=[...CATS_ALIM,...CATS_TRANSP,...CATS_MERC];
 
   const items=getItems();
+  const saidas=items.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i));
 
-  // comprometidos = saídas do mês que NÃO são fixos (alim/transp/merc) e NÃO são de terceiros
-  const comprometidos=items.filter(i=>i.tipo==='saida'&&!CATS_FIXOS.includes(i.cat)&&!isPessoaGasto(i));
-  const totalComp=comprometidos.reduce((a,i)=>a+i.valor,0);
+  // TODOS os gastos já lançados no mês = comprometidos
+  const todosComp=saidas;
+  const totalComp=todosComp.reduce((a,i)=>a+i.valor,0);
 
   // agrupado por categoria para exibição
   const compByCat={};
-  comprometidos.forEach(i=>{compByCat[i.cat]=(compByCat[i.cat]||0)+i.valor;});
+  todosComp.forEach(i=>{compByCat[i.cat]=(compByCat[i.cat]||0)+i.valor;});
   const compCats=Object.entries(compByCat).sort((a,b)=>b[1]-a[1]);
 
-  // deduções fixas (sem os comprometidos — esses já são rastreados separado)
-  const totalDedFixed=inv+res+meu+ela+orcAlim+orcTransp+orcMerc;
-  // orçamento livre = salário − deduções fixas − comprometidos já lançados
-  const livre=Math.max(0,sal-totalDedFixed-totalComp);
+  // orçamento planejado para gastos FUTUROS de alim/transp/merc
+  const totalOrc=orcAlim+orcTransp+orcMerc;
+
+  // orçamento livre = salário − deduções − comprometidos − orçamento planejado fixos
+  const totalDed=inv+res+meu+ela;
+  const livre=Math.max(0,sal-totalDed-totalComp-totalOrc);
   const porSemana=livre/4;
 
   // resultado
@@ -963,39 +966,33 @@ function renderSemana(){
     <div class="br-row"><span class="br-label">− Reserva</span><span class="br-val" style="color:var(--amber)">${fmt(res)}</span></div>
     <div class="br-row"><span class="br-label">− Mesada (eu)</span><span class="br-val" style="color:var(--amber)">${fmt(meu)}</span></div>
     <div class="br-row"><span class="br-label">− Mesada (esposa)</span><span class="br-val" style="color:var(--amber)">${fmt(ela)}</span></div>
-    <div class="br-row"><span class="br-label">− Orç. Alimentação</span><span class="br-val" style="color:var(--purple)">${fmt(orcAlim)}</span></div>
-    <div class="br-row"><span class="br-label">− Orç. Transporte</span><span class="br-val" style="color:var(--purple)">${fmt(orcTransp)}</span></div>
-    <div class="br-row"><span class="br-label">− Orç. Mercantil</span><span class="br-val" style="color:var(--purple)">${fmt(orcMerc)}</span></div>
-    <div class="br-row" style="cursor:pointer" onclick="document.getElementById('compDetail').classList.toggle('open')">
+    <div class="br-divider"></div>
+    <div class="br-row" style="cursor:pointer" onclick="document.getElementById('compDetail').style.display=document.getElementById('compDetail').style.display==='none'?'block':'none'">
       <span class="br-label" style="color:var(--red)">− Comprometidos <span style="font-size:9px;color:var(--t3)">(toque para ver)</span></span>
       <span class="br-val" style="color:var(--red)">${fmt(totalComp)}</span>
     </div>
-    <div id="compDetail" style="display:none;margin:4px 0 2px">
+    <div id="compDetail" style="display:none;margin:4px 0 2px;background:var(--bg3);border-radius:var(--rs);padding:6px 10px">
       ${compCats.length?compCats.map(([cat,val])=>`
-        <div class="br-row" style="padding-left:10px">
-          <span class="br-label" style="font-size:10px;color:var(--t3)">${cat}</span>
+        <div class="br-row" style="padding:3px 0">
+          <span class="br-label" style="font-size:11px;color:var(--t3)">${cat}</span>
           <span class="br-val" style="font-size:11px;color:var(--red)">${fmt(val)}</span>
-        </div>`).join(''):'<div style="font-size:11px;color:var(--t3);padding:4px 10px">Nenhum lançamento ainda</div>'}
+        </div>`).join(''):'<div style="font-size:11px;color:var(--t3);padding:4px 0">Nenhum lançamento ainda</div>'}
     </div>
+    <div class="br-divider"></div>
+    <div class="br-row"><span class="br-label" style="color:var(--purple)">− Orç. Alimentação (futuro)</span><span class="br-val" style="color:var(--purple)">${fmt(orcAlim)}</span></div>
+    <div class="br-row"><span class="br-label" style="color:var(--purple)">− Orç. Transporte (futuro)</span><span class="br-val" style="color:var(--purple)">${fmt(orcTransp)}</span></div>
+    <div class="br-row"><span class="br-label" style="color:var(--purple)">− Orç. Mercantil (futuro)</span><span class="br-val" style="color:var(--purple)">${fmt(orcMerc)}</span></div>
     <div class="br-divider"></div>
     <div class="br-row"><span class="br-total-label">Orçamento livre</span><span class="br-total-val">${fmt(livre)}</span></div>
     <div class="br-row" style="margin-top:2px"><span class="br-label" style="font-size:10px">÷ 4 semanas</span><span class="br-val" style="color:var(--blue);font-weight:600">${fmt(porSemana)} / semana</span></div>`;
 
-  // compDetail toggle handler — keep collapsed on re-render
-  setTimeout(()=>{
-    const cd=document.getElementById('compDetail');
-    if(cd){
-      cd.style.display='none';
-      const row=cd.previousElementSibling;
-      if(row)row.onclick=()=>{cd.style.display=cd.style.display==='none'?'block':'none';};
-    }
-  },0);
-
-  // semanas — gastos não fixos, por data de lançamento
+  // semanas — só gastos que NÃO são alim/transp/merc e NÃO são de terceiros
+  // (pois alim/transp/merc têm acompanhamento próprio abaixo)
+  const orcGastos=saidas.filter(i=>!CATS_FIXOS.includes(i.cat));
   const semBounds=[[1,7],[8,14],[15,21],[22,31]];
   const hoje=new Date();
   document.getElementById('weekCards').innerHTML=semBounds.map((b,idx)=>{
-    const spent=comprometidos.filter(i=>{
+    const spent=orcGastos.filter(i=>{
       if(!i.dataLanc)return false;
       const d=new Date(i.dataLanc);
       return d.getMonth()===curM&&d.getFullYear()===curY&&d.getDate()>=b[0]&&d.getDate()<=b[1];
@@ -1016,10 +1013,10 @@ function renderSemana(){
     </div>`;
   }).join('');
 
-  // acompanhamento fixos: alim, transp, merc
-  const gastoAlim=items.filter(i=>i.tipo==='saida'&&CATS_ALIM.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
-  const gastoTransp=items.filter(i=>i.tipo==='saida'&&CATS_TRANSP.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
-  const gastoMerc=items.filter(i=>i.tipo==='saida'&&CATS_MERC.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
+  // acompanhamento fixos: alim, transp, merc — gastos do próprio mês
+  const gastoAlim=saidas.filter(i=>CATS_ALIM.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
+  const gastoTransp=saidas.filter(i=>CATS_TRANSP.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
+  const gastoMerc=saidas.filter(i=>CATS_MERC.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
   const fixos=[
     {label:'Alimentação',gasto:gastoAlim,orc:orcAlim,cor:'#a78bfa'},
     {label:'Transporte',gasto:gastoTransp,orc:orcTransp,cor:'#4d8ef7'},
@@ -1033,19 +1030,20 @@ function renderSemana(){
     return `<div style="margin-bottom:10px">
       <div class="bar-row" style="margin-bottom:4px">
         <span class="bar-name" style="font-weight:500;color:var(--t)">${f.label}</span>
-        <span class="bar-val" style="color:${cor}">${fmt(f.gasto)}</span>
+        <span class="bar-val" style="color:${cor}">${fmt(f.gasto)}${f.orc>0?` / ${fmt(f.orc)}`:''}</span>
       </div>
       <div class="bar-track" style="height:5px;margin-bottom:3px"><div class="bar-fill" style="width:${pct}%;background:${cor}"></div></div>
       <div style="display:flex;justify-content:space-between">
-        <span style="font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace">${Math.round(pct)}% do orçamento</span>
+        <span style="font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace">${f.orc>0?Math.round(pct)+'% do orçamento':'sem limite definido'}</span>
         <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:${over?'var(--red)':'var(--t3)'}">
-          ${f.orc>0?(over?`excedeu ${fmt(f.gasto-f.orc)}`:`${fmt(left)} restante`):'sem orçamento'}
+          ${f.orc>0?(over?`excedeu ${fmt(f.gasto-f.orc)}`:`${fmt(left)} restante`):''}
         </span>
       </div>
     </div>`;
   }).join('');
   document.getElementById('weekNote').textContent='';
 }
+
 
 // ── HISTÓRICO ──────────────────────────────────────────────
 function renderHist(){
