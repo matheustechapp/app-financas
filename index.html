@@ -1013,10 +1013,17 @@ function renderSemana(){
     </div>`;
   }).join('');
 
-  // acompanhamento fixos: alim, transp, merc — gastos do próprio mês
-  const gastoAlim=saidas.filter(i=>CATS_ALIM.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
-  const gastoTransp=saidas.filter(i=>CATS_TRANSP.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
-  const gastoMerc=saidas.filter(i=>CATS_MERC.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
+  // acompanhamento fixos: alim, transp, merc — gastos feitos NO próprio mês (data do lançamento)
+  // filtra por data de lançamento, não por fatura — evita mostrar gastos de meses anteriores
+  const saidasDoMes=data.filter(i=>{
+    if(i.tipo!=='saida'||isPessoaGasto(i))return false;
+    if(!i.dataLanc)return false;
+    const d=i.dataLanc.split('-');
+    return parseInt(d[0])===curY&&parseInt(d[1])-1===curM;
+  });
+  const gastoAlim=saidasDoMes.filter(i=>CATS_ALIM.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
+  const gastoTransp=saidasDoMes.filter(i=>CATS_TRANSP.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
+  const gastoMerc=saidasDoMes.filter(i=>CATS_MERC.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
   const fixos=[
     {label:'Alimentação',gasto:gastoAlim,orc:orcAlim,cor:'#a78bfa'},
     {label:'Transporte',gasto:gastoTransp,orc:orcTransp,cor:'#4d8ef7'},
