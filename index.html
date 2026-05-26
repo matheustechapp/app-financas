@@ -1903,7 +1903,12 @@ function renderPessoas(){
     let pessoasHtml='';
 
     if(grupo.cobrarGrupo){
-      const pendencias=getPendenciasPorMesGrupo(grupo);
+      const todasPendenciasGrupo=getPendenciasPorMesGrupo(grupo);
+      const curKey2=curY*100+curM;
+      // na aba "A receber", mostra só mês atual e atrasados (não futuros)
+      const pendencias=pessoasTab==='pendente'
+        ? todasPendenciasGrupo.filter(p=>p.y*100+p.m<=curKey2)
+        : todasPendenciasGrupo;
       const totalPendente=totalPendenteGlobal(pendencias);
       const atrasados=mesesEmAtraso(pendencias);
       const temAtraso=atrasados.length>0;
@@ -1931,7 +1936,12 @@ function renderPessoas(){
       }
     } else {
       pessoasHtml=grupo.pessoas.map((pessoa,pi)=>{
-        const pendencias=getPendenciasPorMes(pessoa.id);
+        const todasPendencias=getPendenciasPorMes(pessoa.id);
+        const curKey2=curY*100+curM;
+        // na aba "A receber", mostra só mês atual e atrasados (não futuros)
+        const pendencias=pessoasTab==='pendente'
+          ? todasPendencias.filter(p=>p.y*100+p.m<=curKey2)
+          : todasPendencias;
         const totalPendente=totalPendenteGlobal(pendencias);
         const atrasados=mesesEmAtraso(pendencias);
         const temAtraso=atrasados.length>0;
@@ -1963,10 +1973,17 @@ function renderPessoas(){
 
     // total geral do grupo (todos os meses)
     let totalGrupo=0;
+    const curKey3=curY*100+curM;
     if(grupo.cobrarGrupo){
-      totalGrupo=totalPendenteGlobal(getPendenciasPorMesGrupo(grupo));
+      const pends=getPendenciasPorMesGrupo(grupo);
+      const pendsVisiveis=pessoasTab==='pendente'?pends.filter(p=>p.y*100+p.m<=curKey3):pends;
+      totalGrupo=totalPendenteGlobal(pendsVisiveis);
     } else {
-      totalGrupo=grupo.pessoas.reduce((a,p)=>a+totalPendenteGlobal(getPendenciasPorMes(p.id)),0);
+      totalGrupo=grupo.pessoas.reduce((a,p)=>{
+        const pends=getPendenciasPorMes(p.id);
+        const pendsVisiveis=pessoasTab==='pendente'?pends.filter(x=>x.y*100+x.m<=curKey3):pends;
+        return a+totalPendenteGlobal(pendsVisiveis);
+      },0);
     }
     const atrasadosGrupo=grupo.cobrarGrupo?
       mesesEmAtraso(getPendenciasPorMesGrupo(grupo)):
