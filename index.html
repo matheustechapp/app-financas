@@ -827,7 +827,7 @@ function mesOpts(sm,sy,label=''){
 }
 
 // ── RENDER ─────────────────────────────────────────────────
-function isPessoaGasto(i){return i.tipo==='saida'&&!!i.pessoaId;}
+function isPessoaGasto(i){return i.tipo==='saida'&&(!!i.pessoaId||i.cat==='Gastos dos Outros');}
 function render(){
   const items=getItems();
   const ent=items.filter(i=>i.tipo==='entrada').reduce((a,i)=>a+i.valor,0);
