@@ -634,6 +634,9 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
   <div class="modal">
     <div class="m-handle"></div>
     <div class="m-title" id="mTitle">Novo Lançamento</div>
+    <div id="recEditBadge" style="display:none;align-items:center;gap:6px;background:var(--bbg);border-radius:var(--rs);padding:7px 11px;margin-bottom:12px;font-size:11px;font-weight:600;color:var(--blue)">
+      ↺ Recorrente — alteração apenas neste mês. Para mudar toda a série, acesse Configurações.
+    </div>
     <div class="type-row">
       <button class="tbtn ae" id="btnE" onclick="setTipo('entrada')">↓ Entrada</button>
       <button class="tbtn" id="btnS" onclick="setTipo('saida')">↑ Saída</button>
@@ -1232,16 +1235,20 @@ function renderRecList(){
     el.innerHTML='<div class="empty" style="padding:16px 0">Nenhum lançamento recorrente</div>';
     return;
   }
+  // build pessoa names map
+  const pessoaNomesRec={};
+  grupos.forEach(g=>g.pessoas.forEach(p=>{pessoaNomesRec[p.id]=p.nome;}));
   el.innerHTML=recs.map(r=>{
     const ini=`${MS[r.iniM]} ${r.iniY}`;
     const fim=r.fimM?`${MS[r.fimM]} ${r.fimY}`:'Indefinido';
     const tipo=r.tpl.tipo==='entrada'?'Entrada':'Saída';
     const cor=r.tpl.tipo==='entrada'?'var(--green)':'var(--red)';
+    const pessoaNome=r.tpl.pessoaId?pessoaNomesRec[r.tpl.pessoaId]:null;
     return `<div class="rec-card">
       <div class="rec-card-head">
         <div>
-          <div class="rec-card-desc">${r.tpl.desc}</div>
-          <div class="rec-card-meta">${r.tpl.cat} · ${CARD_NAMES[r.tpl.pgto]||r.tpl.pgto||''} · ${ini} → ${fim}</div>
+          <div class="rec-card-desc">${r.tpl.desc}${pessoaNome?` <span style="font-size:10px;background:var(--bbg);color:var(--blue);border-radius:4px;padding:1px 6px;font-weight:700">${pessoaNome}</span>`:''}</div>
+          <div class="rec-card-meta">${r.tpl.cat} · ${CARD_NAMES[r.tpl.pgto]||r.tpl.pgto||''} · ${r.tpl.resp||''} · ${ini} → ${fim}</div>
         </div>
         <div style="text-align:right">
           <div class="rec-card-val" style="color:${cor}">${tipo==='Entrada'?'+':'-'}${fmt(r.tpl.valor)}</div>
@@ -1299,6 +1306,9 @@ function openModal(){
   document.getElementById('fData').value=new Date().toISOString().split('T')[0];
   document.getElementById('togRec').classList.remove('on');
   document.getElementById('recF').classList.remove('show');
+  document.getElementById('togRec').closest('.tog-row').style.display='flex';
+  const recBadge=document.getElementById('recEditBadge');
+  if(recBadge)recBadge.style.display='none';
   setTipo('saida');
   document.getElementById('fFatura').innerHTML=mesOpts(curM,curY,'— mesmo mês —');
   document.getElementById('fRecIni').innerHTML=mesOpts(curM,curY);
@@ -1312,20 +1322,39 @@ function openModal(){
 
 function editItem(id){
   const item=data.find(i=>i.id===id);if(!item)return;
+  const isRec=!!item.recId;
   document.getElementById('editId').value=id;
-  document.getElementById('mTitle').textContent='Editar Lançamento';
+  document.getElementById('mTitle').textContent=isRec?'Editar — só este mês':'Editar Lançamento';
+  const badge=document.getElementById('recEditBadge');
+  if(badge)badge.style.display=isRec?'flex':'none';
   document.getElementById('fDesc').value=item.desc;
   document.getElementById('fDet').value=item.det||'';
   document.getElementById('fVal').value=item.valor;
   document.getElementById('fData').value=item.dataLanc||'';
   setTipo(item.tipo);
-  document.getElementById('fCat').value=item.cat;
-  document.getElementById('fPgto').value=item.pgto||'C6';
-  document.getElementById('fResp').value=item.resp||'Crédito';
+  populatePessoaSelect();
+  setTimeout(()=>{
+    document.getElementById('fCat').value=item.cat;
+    document.getElementById('fPgto').value=item.pgto||'C6';
+    document.getElementById('fResp').value=item.resp||'Crédito';
+    // pre-select pessoa if set
+    const fpEl=document.getElementById('fPessoa');
+    if(fpEl){
+      fpEl.value=item.pessoaId||'';
+      document.getElementById('fieldPessoa').style.display=item.tipo==='saida'?'block':'none';
+    }
+  },50);
   document.getElementById('fFatura').innerHTML=mesOpts(item.fatM,item.fatY,'— mesmo mês —');
   if(item.fatM!==item.lanM||item.fatY!==item.lanY)document.getElementById('fFatura').value=`${item.fatM}-${item.fatY}`;
   document.getElementById('togRec').classList.remove('on');
   document.getElementById('recF').classList.remove('show');
+  if(isRec){
+    // recorrente: esconde toggle (edição é só deste mês)
+    document.getElementById('togRec').closest('.tog-row').style.display='none';
+    document.getElementById('recF').style.display='none';
+  } else {
+    document.getElementById('togRec').closest('.tog-row').style.display='flex';
+  }
   document.getElementById('mbg').classList.add('open');
 }
 
@@ -1356,7 +1385,13 @@ function editarRecorrente(recId){
     document.getElementById('fCat').value=rec.tpl.cat;
     document.getElementById('fPgto').value=rec.tpl.pgto||'C6';
     document.getElementById('fResp').value=rec.tpl.resp||'Crédito';
-  },50);
+    // pre-select pessoa if set
+    const fpSel=document.getElementById('fPessoa');
+    if(fpSel&&rec.tpl.pessoaId){
+      fpSel.value=rec.tpl.pessoaId;
+      document.getElementById('fieldPessoa').style.display='block';
+    }
+  },100);
   // show rec fields pre-filled
   document.getElementById('togRec').classList.add('on');
   document.getElementById('recF').classList.add('show');
@@ -1407,9 +1442,12 @@ function salvar(){
   const editId=isRecEdit?'':editIdRaw;
   const isRec=document.getElementById('togRec').classList.contains('on');
   const pessoaId=document.getElementById('fPessoa')?.value||null;
-  const item={id:editId||Date.now().toString(),tipo:curTipo,desc,det:document.getElementById('fDet').value.trim(),valor:parseFloat(val.toFixed(2)),dataLanc,lanM,lanY,fatM,fatY,cat:document.getElementById('fCat').value,pgto:document.getElementById('fPgto').value,resp:document.getElementById('fResp').value,pessoaId:pessoaId||null,recId:null};
+  // preserve recId when editing a single month of a recorrente
+  const existingItem=editId?data.find(i=>i.id===editId):null;
+  const preservedRecId=existingItem?.recId||null;
+  const item={id:editId||Date.now().toString(),tipo:curTipo,desc,det:document.getElementById('fDet').value.trim(),valor:parseFloat(val.toFixed(2)),dataLanc,lanM,lanY,fatM,fatY,cat:document.getElementById('fCat').value,pgto:document.getElementById('fPgto').value,resp:document.getElementById('fResp').value,pessoaId:pessoaId||null,recId:preservedRecId};
   if(isRecEdit&&recEditId){
-    // update the recorrente template
+    // editing full series from Config screen — update template
     const recIdx=recs.findIndex(r=>r.id===recEditId);
     if(recIdx>=0){
       const ip=(document.getElementById('fRecIni').value||`${curM}-${curY}`).split('-');
@@ -1419,15 +1457,17 @@ function salvar(){
         ...recs[recIdx],
         iniM:parseInt(ip[0]),iniY:parseInt(ip[1]),
         fimM:fpp?parseInt(fpp[0]):null,fimY:fpp?parseInt(fpp[1]):null,
-        tpl:{...recs[recIdx].tpl,...item,recId:'_'}
+        tpl:{...recs[recIdx].tpl,...item,recId:'_',pessoaId:pessoaId||null}
       };
       localStorage.setItem('fluxo_recs3',JSON.stringify(recs));
       sbSaveRec(recs[recIdx]);
     }
     save();closeModal();applyRecs();render();
-    showToast('Recorrente atualizado!');
+    showToast('Série atualizada!');
     return;
   }
+  // editing a single recorrente instance (from list) — keep recId, only update this item
+  // recId is preserved so future months still generate from template
   if(editId){data=data.map(i=>i.id===editId?item:i);}else{data.push(item);}
   if(isRec&&!editId){
     const ip=(document.getElementById('fRecIni').value||`${curM}-${curY}`).split('-');
