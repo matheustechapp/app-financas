@@ -2205,7 +2205,7 @@ function toggleCartaoCard(id){
 function renderCartoes(){
   const mlEl=document.getElementById('mlCartoes');
   if(mlEl)mlEl.textContent=mStr(curM,curY);
-  const items=getItems().filter(i=>i.tipo==='saida');
+  const items=getItems().filter(i=>i.tipo==='saida'&&(i.resp==='Crédito'||i.resp==='Adicional'));
   const byCard={};
   items.forEach(i=>{
     const k=i.pgto||'Outros';
