@@ -326,6 +326,42 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
 .cartao-item-val{font-size:12px;font-weight:700;color:var(--red);font-family:'Manrope',sans-serif;flex-shrink:0}
 .cartao-body{display:none;border-top:1px solid var(--b)}
 .cartao-ver-mais{width:100%;background:none;border:none;color:var(--blue);font-size:12px;font-weight:600;padding:10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
+
+/* ── V3.1 — MULTISELECT (msel) ─────────────────────────── */
+.msel{position:relative}
+.msel-btn{width:100%;background:var(--bg3);border:1.5px solid var(--b);border-radius:var(--rs);padding:7px 24px 7px 10px;font-size:11px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;color:var(--t2);outline:none;cursor:pointer;text-align:left;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msel-btn::after{content:'▾';position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--t3);pointer-events:none}
+.msel.open .msel-btn::after{transform:translateY(-50%) rotate(180deg)}
+.msel.open .msel-btn{border-color:var(--blue)}
+.msel-badge{display:inline-flex;align-items:center;justify-content:center;min-width:15px;height:15px;padding:0 4px;background:var(--blue);color:#fff;border-radius:50px;font-size:9px;font-weight:700;margin-left:5px;vertical-align:middle}
+.msel-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--bg2);border:1px solid var(--b2);border-radius:var(--rs);box-shadow:var(--shadow-lg);z-index:60;max-height:220px;overflow-y:auto;padding:6px}
+.msel.open .msel-panel{display:block}
+.msel-opt{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:12px;color:var(--t);font-weight:500}
+.msel-opt:active{background:var(--bg3)}
+.msel-opt input{width:14px;height:14px;accent-color:var(--blue);flex-shrink:0;cursor:pointer}
+.msel-empty{padding:10px 8px;font-size:11px;color:var(--t3);text-align:center}
+
+/* ── V3.1 — TOTALIZADOR DE FILTRO ──────────────────────── */
+.filter-total{display:none;align-items:center;justify-content:space-between;background:var(--bg2);border:1.5px solid var(--b2);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;box-shadow:var(--shadow)}
+.ft-label{font-size:11px;color:var(--t3);font-weight:600}
+.ft-val{font-size:15px;font-weight:800;font-family:'Manrope',sans-serif;letter-spacing:-.3px}
+.ft-val.pos{color:var(--green)}
+.ft-val.neg{color:var(--red)}
+
+/* ── V3.1 — HISTÓRICO: ABAS / BUSCA POR PERÍODO ────────── */
+.hist-tabs{display:flex;gap:6px;margin-bottom:12px}
+.hist-tabs .fbtn{flex:1;text-align:center}
+.hist-month.current{border:1.5px solid var(--blue);box-shadow:0 4px 16px rgba(59,108,244,0.15)}
+.hm-tag-atual{display:inline-block;background:var(--bbg);color:var(--blue);font-size:9px;font-weight:700;letter-spacing:.5px;border-radius:4px;padding:2px 6px;margin-left:6px;vertical-align:middle}
+.period-nav{display:flex;align-items:center;justify-content:center;gap:14px;background:var(--bg2);border-radius:var(--r);padding:10px;margin-bottom:12px;box-shadow:var(--shadow)}
+.period-nav button{background:var(--bg3);border:none;width:28px;height:28px;border-radius:50%;font-size:16px;color:var(--t2);cursor:pointer}
+.period-nav .ml{font-size:13px;font-weight:700;color:var(--t);min-width:110px;text-align:center}
+
+/* ── V3.1 — METAS: DRAG AND DROP ───────────────────────── */
+.meta-card{position:relative;touch-action:pan-y}
+.meta-card.dragging{box-shadow:var(--shadow-lg);z-index:20;opacity:.92}
+.meta-drag{display:flex;align-items:center;justify-content:center;width:100%;padding-bottom:8px;margin-bottom:8px;border-bottom:1px dashed var(--b2);color:var(--t3);font-size:13px;letter-spacing:5px;cursor:grab;touch-action:none;user-select:none}
+.meta-drag:active{cursor:grabbing;color:var(--blue);border-color:var(--blue)}
 </style>
 </head>
 <body>
@@ -401,34 +437,26 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
           <input type="text" id="filterSearch" placeholder="Buscar por descrição..." oninput="applyFilters()">
         </div>
         <div class="filter-selects">
-          <div class="filter-select-wrap">
-            <select id="filterCat" onchange="applyFilters()">
-              <option value="">Categoria</option>
-            </select>
+          <div class="msel" id="mselCat">
+            <button type="button" class="msel-btn" onclick="toggleMsel('mselCat')">Categoria<span class="msel-badge" id="mselCatBadge" style="display:none"></span></button>
+            <div class="msel-panel" id="mselCatPanel"></div>
           </div>
-          <div class="filter-select-wrap">
-            <select id="filterCartao" onchange="applyFilters()">
-              <option value="">Cartão</option>
-              <option value="C6">Cartão C6 Bank</option>
-              <option value="Inter">Cartão Inter</option>
-              <option value="XP">Cartão XP</option>
-              <option value="TAP">Cartão Azul Platinum</option>
-              <option value="Nubank">Cartão Nubank</option>
-            </select>
+          <div class="msel" id="mselCartao">
+            <button type="button" class="msel-btn" onclick="toggleMsel('mselCartao')">Cartão<span class="msel-badge" id="mselCartaoBadge" style="display:none"></span></button>
+            <div class="msel-panel" id="mselCartaoPanel"></div>
           </div>
-          <div class="filter-select-wrap">
-            <select id="filterResp" onchange="applyFilters()">
-              <option value="">Forma Pgt.</option>
-              <option value="Crédito">Crédito</option>
-              <option value="Débito">Débito</option>
-              <option value="Adicional">Adicional</option>
-              <option value="Família Brenda">Família Brenda</option>
-            </select>
+          <div class="msel" id="mselResp">
+            <button type="button" class="msel-btn" onclick="toggleMsel('mselResp')">Forma Pgt.<span class="msel-badge" id="mselRespBadge" style="display:none"></span></button>
+            <div class="msel-panel" id="mselRespPanel"></div>
           </div>
           <div style="display:flex;align-items:center;justify-content:flex-end">
             <button class="filter-clear" onclick="clearFilters()" id="clearFiltersBtn" style="display:none">✕ Limpar</button>
           </div>
         </div>
+      </div>
+      <div class="filter-total" id="filterTotal">
+        <span class="ft-label">Soma do filtro</span>
+        <span class="ft-val" id="filterTotalVal">R$ 0,00</span>
       </div>
       <div id="listEl"></div>
     </div>
@@ -505,12 +533,46 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
   <div class="topbar"><div class="t-title">Histórico</div></div>
   <div class="scroll">
     <div class="sec">
-      <div class="slabel" style="margin-bottom:12px">maiores gastos — todos os meses</div>
-      <div class="chart-box" style="margin-bottom:12px">
-        <div class="bar-chart" id="topCatBars"></div>
+      <div class="hist-tabs">
+        <button class="fbtn active" id="histTabMes" onclick="setHistTab('mes')">Por mês</button>
+        <button class="fbtn" id="histTabPeriodo" onclick="setHistTab('periodo')">Busca por período</button>
       </div>
-      <div class="slabel" style="margin-bottom:12px">por mês</div>
-      <div id="histList"></div>
+      <div id="histMesView">
+        <div class="slabel" style="margin-bottom:12px">maiores gastos — todos os meses</div>
+        <div class="chart-box" style="margin-bottom:12px">
+          <div class="bar-chart" id="topCatBars"></div>
+        </div>
+        <div class="slabel" style="margin-bottom:12px">por mês</div>
+        <div id="histList"></div>
+      </div>
+      <div id="histPeriodoView" style="display:none">
+        <div class="period-nav">
+          <button onclick="chMPeriodo(-1)">‹</button>
+          <span class="ml" id="mlHistPeriodo">–</span>
+          <button onclick="chMPeriodo(1)">›</button>
+        </div>
+        <div class="filter-bar">
+          <div class="filter-selects">
+            <div class="msel" id="mselPCat">
+              <button type="button" class="msel-btn" onclick="toggleMsel('mselPCat')">Categoria<span class="msel-badge" id="mselPCatBadge" style="display:none"></span></button>
+              <div class="msel-panel" id="mselPCatPanel"></div>
+            </div>
+            <div class="msel" id="mselPCartao">
+              <button type="button" class="msel-btn" onclick="toggleMsel('mselPCartao')">Cartão<span class="msel-badge" id="mselPCartaoBadge" style="display:none"></span></button>
+              <div class="msel-panel" id="mselPCartaoPanel"></div>
+            </div>
+            <div class="msel" id="mselPResp">
+              <button type="button" class="msel-btn" onclick="toggleMsel('mselPResp')">Forma Pgt.<span class="msel-badge" id="mselPRespBadge" style="display:none"></span></button>
+              <div class="msel-panel" id="mselPRespPanel"></div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:flex-end">
+              <button class="filter-clear" onclick="clearPeriodoFilters()" id="clearPeriodoFiltersBtn" style="display:none">✕ Limpar</button>
+            </div>
+          </div>
+        </div>
+        <div class="slabel" style="margin-bottom:12px">6 meses atrás → 6 meses à frente</div>
+        <div id="histPeriodoList"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -809,7 +871,10 @@ let recs=JSON.parse(localStorage.getItem('fluxo_recs3')||'[]');
 let wsetup=JSON.parse(localStorage.getItem('fluxo_wsetup')||'{}');
 let curM=new Date().getMonth(),curY=new Date().getFullYear();
 let curFilter='todos',curTipo='saida',curMetaCor=PAL[0];
-let fSearch='',fCat='',fCartao='',fResp='';
+let fSearch='',fCat=[],fCartao=[],fResp=[];
+// busca por período (Histórico)
+let pfCat=[],pfCartao=[],pfResp=[];
+let pRefM=new Date().getMonth(),pRefY=new Date().getFullYear();
 
 const fmt=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const fmtD=s=>{if(!s)return'';const p=s.split('-');return`${p[2]}/${p[1]}`};
@@ -865,26 +930,39 @@ function renderList(items){
   const pessoaNomes={};
   grupos.forEach(g=>g.pessoas.forEach(p=>{pessoaNomes[p.id]=p.nome;}));
   const IC={'Alimentação - Necessidade':'🍽','Alimentação - Saídas':'🍔','Mercantil':'🛒','Saúde':'💊','Assinaturas':'📱','Impostos':'🏛','Custo fixo':'🔒','Carro - Transporte':'🚗','Casa':'🏠','Presentes':'🎁','Viagem':'✈️','Estudos/Capacitação':'📚','Gastos Extras':'💸','Gastos dos Outros':'👥','Compras Pessoais':'🛍','Comunidade':'🤝','Maria Áurea':'👶','Doce Áurea':'🍫','Salário':'💼','Freelance':'💻','Investimentos':'📈','Fatura':'💳','Reembolso':'↩️','Anuidade':'🔖','Outros':'📌'};
-  // populate category filter options
-  const catSel=document.getElementById('filterCat');
-  if(catSel){
-    const usedCats=[...new Set(items.map(i=>i.cat).filter(Boolean))].sort();
-    const curCatVal=catSel.value;
-    catSel.innerHTML='<option value="">Categoria</option>'+usedCats.map(c=>`<option value="${c}"${c===curCatVal?' selected':''}>${c}</option>`).join('');
-  }
+  // popula opções das multisseleções (categoria dinâmica pelo mês; cartão/forma fixos)
+  const usedCats=[...new Set(items.map(i=>i.cat).filter(Boolean))].sort();
+  renderMselOptions('mselCatPanel',usedCats,fCat,'toggleFCat');
+  updateMselBadge('mselCatBadge',fCat);
+  renderMselOptions('mselCartaoPanel',Object.entries(CARD_NAMES).map(([value,label])=>({value,label})),fCartao,'toggleFCartao');
+  updateMselBadge('mselCartaoBadge',fCartao);
+  renderMselOptions('mselRespPanel',['Crédito','Débito','Adicional','Família Brenda'],fResp,'toggleFResp');
+  updateMselBadge('mselRespBadge',fResp);
   let fil=(curFilter==='todos'?items:items.filter(i=>i.tipo===curFilter));
   // apply advanced filters
   if(fSearch)fil=fil.filter(i=>i.desc&&i.desc.toLowerCase().includes(fSearch.toLowerCase()));
-  if(fCat)fil=fil.filter(i=>i.cat===fCat);
-  if(fCartao)fil=fil.filter(i=>i.pgto===fCartao);
-  if(fResp)fil=fil.filter(i=>i.resp===fResp);
+  if(fCat.length)fil=fil.filter(i=>fCat.includes(i.cat));
+  if(fCartao.length)fil=fil.filter(i=>fCartao.includes(i.pgto));
+  if(fResp.length)fil=fil.filter(i=>fResp.includes(i.resp));
   fil=fil.sort((a,b)=>new Date(b.dataLanc||0)-new Date(a.dataLanc||0));
   // update count and clear button
   const countEl=document.getElementById('listCount');
   if(countEl)countEl.textContent=fil.length+' registro'+(fil.length!==1?'s':'');
-  const hasFilters=fSearch||fCat||fCartao||fResp;
+  const hasFilters=fSearch||fCat.length||fCartao.length||fResp.length;
   const clearBtn=document.getElementById('clearFiltersBtn');
   if(clearBtn)clearBtn.style.display=hasFilters?'inline-flex':'none';
+  // totalizador do filtro
+  const totEl=document.getElementById('filterTotal');
+  if(totEl){
+    if(hasFilters&&fil.length){
+      const soma=fil.reduce((a,i)=>a+(i.tipo==='entrada'?i.valor:-i.valor),0);
+      document.getElementById('filterTotalVal').textContent=fmt(soma);
+      document.getElementById('filterTotalVal').className='ft-val '+(soma>=0?'pos':'neg');
+      totEl.style.display='flex';
+    } else {
+      totEl.style.display='none';
+    }
+  }
   const el=document.getElementById('listEl');
   if(!fil.length){el.innerHTML=`<div class="empty">${hasFilters?'Nenhum resultado para os filtros':'Nenhum lançamento'}</div>`;return;}
   el.innerHTML=fil.map((item,idx)=>{
@@ -1117,6 +1195,82 @@ function toggleHist(k){
   el.classList.toggle('open');
 }
 
+// ── HISTÓRICO: BUSCA POR PERÍODO (-6 / +6 meses) ──────────
+function setHistTab(tab){
+  const bMes=document.getElementById('histTabMes'),bPer=document.getElementById('histTabPeriodo');
+  if(bMes)bMes.classList.toggle('active',tab==='mes');
+  if(bPer)bPer.classList.toggle('active',tab==='periodo');
+  const vMes=document.getElementById('histMesView'),vPer=document.getElementById('histPeriodoView');
+  if(vMes)vMes.style.display=tab==='mes'?'block':'none';
+  if(vPer)vPer.style.display=tab==='periodo'?'block':'none';
+  if(tab==='periodo'){renderPeriodoFilters();renderHistPeriodo();}
+}
+function chMPeriodo(d){
+  pRefM+=d;
+  if(pRefM<0){pRefM=11;pRefY--;}
+  if(pRefM>11){pRefM=0;pRefY++;}
+  renderHistPeriodo();
+}
+function togglePfCat(v){pfCat=mselToggle(pfCat,v);renderPeriodoFilters();renderHistPeriodo();}
+function togglePfCartao(v){pfCartao=mselToggle(pfCartao,v);renderPeriodoFilters();renderHistPeriodo();}
+function togglePfResp(v){pfResp=mselToggle(pfResp,v);renderPeriodoFilters();renderHistPeriodo();}
+function clearPeriodoFilters(){pfCat=[];pfCartao=[];pfResp=[];renderPeriodoFilters();renderHistPeriodo();}
+function renderPeriodoFilters(){
+  const usedCats=[...new Set(data.map(i=>i.cat).filter(Boolean))].sort();
+  renderMselOptions('mselPCatPanel',usedCats,pfCat,'togglePfCat');
+  updateMselBadge('mselPCatBadge',pfCat);
+  renderMselOptions('mselPCartaoPanel',Object.entries(CARD_NAMES).map(([value,label])=>({value,label})),pfCartao,'togglePfCartao');
+  updateMselBadge('mselPCartaoBadge',pfCartao);
+  renderMselOptions('mselPRespPanel',['Crédito','Débito','Adicional','Família Brenda'],pfResp,'togglePfResp');
+  updateMselBadge('mselPRespBadge',pfResp);
+  const clearBtn=document.getElementById('clearPeriodoFiltersBtn');
+  if(clearBtn)clearBtn.style.display=(pfCat.length||pfCartao.length||pfResp.length)?'inline-flex':'none';
+}
+function getFilteredPeriodoItems(m,y){
+  return data.filter(i=>{
+    if(i.fatM!==m||i.fatY!==y)return false;
+    if(pfCat.length&&!pfCat.includes(i.cat))return false;
+    if(pfCartao.length&&!pfCartao.includes(i.pgto))return false;
+    if(pfResp.length&&!pfResp.includes(i.resp))return false;
+    return true;
+  });
+}
+function renderHistPeriodo(){
+  const mlEl=document.getElementById('mlHistPeriodo');
+  if(mlEl)mlEl.textContent=mStr(pRefM,pRefY);
+  const months=[];
+  for(let off=-6;off<=6;off++){
+    let mo=pRefM+off,yr=pRefY;
+    while(mo<0){mo+=12;yr--;}
+    while(mo>11){mo-=12;yr++;}
+    months.push({m:mo,y:yr});
+  }
+  const el=document.getElementById('histPeriodoList');
+  if(!el)return;
+  el.innerHTML=months.map(({m,y})=>{
+    const items=getFilteredPeriodoItems(m,y);
+    const ent=items.filter(i=>i.tipo==='entrada').reduce((a,i)=>a+i.valor,0);
+    const sai=items.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i)).reduce((a,i)=>a+i.valor,0);
+    const isCur=m===pRefM&&y===pRefY;
+    const k=`p-${y}-${m}`;
+    const byCat={};items.filter(i=>i.tipo==='saida').forEach(i=>{byCat[i.cat]=(byCat[i.cat]||0)+i.valor;});
+    const cats=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+    return `<div class="hist-month ${isCur?'current':''}">
+      <div class="hist-month-head" onclick="toggleHist('${k}')">
+        <span class="hm-title">${MS[m]} ${y}${isCur?'<span class="hm-tag-atual">atual</span>':''}</span>
+        <span class="hm-bal">${items.length} ${items.length===1?'item':'itens'}</span>
+      </div>
+      <div class="hm-body" id="hm-${k}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 0 8px">
+          <div style="text-align:center"><div style="font-size:10px;color:var(--t3);margin-bottom:2px">Entradas</div><div style="font-size:13px;font-weight:600;color:var(--green);font-family:'JetBrains Mono',monospace">${fmt(ent)}</div></div>
+          <div style="text-align:center"><div style="font-size:10px;color:var(--t3);margin-bottom:2px">Saídas</div><div style="font-size:13px;font-weight:600;color:var(--red);font-family:'JetBrains Mono',monospace">${fmt(sai)}</div></div>
+        </div>
+        ${items.length?cats.map(([cat,val])=>`<div class="hm-row"><span class="hm-cat">${cat}</span><span class="hm-val">${fmt(val)}</span></div>`).join(''):'<div class="empty" style="padding:12px 0">Nenhum lançamento</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
 // ── METAS ──────────────────────────────────────────────────
 function renderMetas(){
   const mlEl=document.getElementById('mlMetas');
@@ -1142,7 +1296,8 @@ function renderMetas(){
       }).reduce((a,i)=>a+i.valor,0);
       const pct=m.lim>0?Math.min(gasto/m.lim*100,100):0;
       const cor=pct>=100?'var(--red)':pct>=80?'var(--amber)':m.cor||'var(--green)';
-      return `<div class="meta-card">
+      return `<div class="meta-card" data-meta-id="${m.id}">
+        <div class="meta-drag" data-meta-id="${m.id}">⠿⠿⠿</div>
         <div class="meta-tipo-badge meta-tipo-teto">🎯 Teto de gastos</div>
         <div class="meta-head"><span class="meta-name">${m.nome}</span><span class="meta-vals">${fmt(gasto)} / ${fmt(m.lim)}</span></div>
         <div class="meta-track"><div class="meta-fill" style="width:${pct}%;background:${cor}"></div></div>
@@ -1183,7 +1338,8 @@ function renderMetas(){
             </div>
           </div>`).join('')}
       </div>`:'';
-      return `<div class="meta-card">
+      return `<div class="meta-card" data-meta-id="${m.id}">
+        <div class="meta-drag" data-meta-id="${m.id}">⠿⠿⠿</div>
         <div class="meta-tipo-badge meta-tipo-econ">💰 Meta de economia</div>
         <div class="meta-head"><span class="meta-name">${m.nome}</span><span class="meta-vals">${fmt(acumulado)} / ${fmt(totalObj)}</span></div>
         <div class="meta-track"><div class="meta-fill" style="width:${pct}%;background:${cor}"></div></div>
@@ -1218,6 +1374,71 @@ function renderMetas(){
 
   html+=`<button class="add-meta" onclick="openMetaModal()">+ Nova meta</button>`;
   el.innerHTML=html;
+  initMetaDrag();
+}
+
+// ── METAS: DRAG AND DROP PARA REORDENAR ───────────────────
+let dragCtx=null;
+function initMetaDrag(){
+  document.querySelectorAll('.meta-drag').forEach(h=>{h.onpointerdown=metaDragStart;});
+}
+function metaDragStart(e){
+  e.preventDefault();
+  const handle=e.currentTarget;
+  const card=handle.closest('.meta-card');
+  if(!card)return;
+  dragCtx={metaId:card.dataset.metaId,cardEl:card,baseY:e.clientY};
+  card.classList.add('dragging');
+  try{handle.setPointerCapture(e.pointerId);}catch(err){}
+  window.addEventListener('pointermove',metaDragMove);
+  window.addEventListener('pointerup',metaDragEnd);
+  window.addEventListener('pointercancel',metaDragEnd);
+}
+function metaDragMove(e){
+  if(!dragCtx)return;
+  const dy=e.clientY-dragCtx.baseY;
+  const card=dragCtx.cardEl;
+  card.style.transform=`translateY(${dy}px)`;
+  const list=document.getElementById('metasEl');
+  if(!list)return;
+  const items=[...list.children].filter(c=>c.classList.contains('meta-card'));
+  const idx=items.indexOf(card);
+  if(idx===-1)return;
+  const visualCenter=card.offsetTop+dy+card.offsetHeight/2;
+  if(idx>0){
+    const prev=items[idx-1];
+    const prevCenter=prev.offsetTop+prev.offsetHeight/2;
+    if(visualCenter<prevCenter){swapMetas(idx,idx-1);dragCtx.baseY=e.clientY;return;}
+  }
+  if(idx<items.length-1){
+    const next=items[idx+1];
+    const nextCenter=next.offsetTop+next.offsetHeight/2;
+    if(visualCenter>nextCenter){swapMetas(idx,idx+1);dragCtx.baseY=e.clientY;}
+  }
+}
+function swapMetas(i,j){
+  [metas[i],metas[j]]=[metas[j],metas[i]];
+  renderMetas();
+  const list=document.getElementById('metasEl');
+  const el=list?.querySelector(`.meta-card[data-meta-id="${dragCtx.metaId}"]`);
+  if(el){dragCtx.cardEl=el;el.classList.add('dragging');el.style.transform='translateY(0px)';}
+}
+function metaDragEnd(){
+  if(!dragCtx)return;
+  const card=dragCtx.cardEl;
+  card.classList.remove('dragging');
+  card.style.transform='';
+  window.removeEventListener('pointermove',metaDragMove);
+  window.removeEventListener('pointerup',metaDragEnd);
+  window.removeEventListener('pointercancel',metaDragEnd);
+  dragCtx=null;
+  persistMetasOrder();
+}
+function persistMetasOrder(){
+  metas.forEach((m,i)=>{m.ordem=i;});
+  localStorage.setItem('fluxo_metas3',JSON.stringify(metas));
+  metas.forEach(m=>sbSaveMeta(m));
+  showToast('Ordem salva');
 }
 
 
@@ -1555,8 +1776,14 @@ function salvarMeta(){
     if(!totalObj&&!porMes){showToast('Preencha o valor total ou por mês');return;}
     meta={id:editId||Date.now().toString(),tipo:'economia',nome,totalObj:totalObj||0,porMes:porMes||0,cor:curMetaCor,iniM,iniY,fimM,fimY};
   }
-  if(editId){metas=metas.map(m=>m.id===editId?meta:m);}
-  else{metas.push(meta);}
+  if(editId){
+    const old=metas.find(m=>m.id===editId);
+    meta.ordem=(old&&old.ordem!=null)?old.ordem:metas.findIndex(m=>m.id===editId);
+    metas=metas.map(m=>m.id===editId?meta:m);
+  } else {
+    meta.ordem=metas.length;
+    metas.push(meta);
+  }
   localStorage.setItem('fluxo_metas3',JSON.stringify(metas));
   sbSaveMeta(meta);
   closeMetaModal();render();showToast(editId?'Meta atualizada!':'Meta criada!');
@@ -1609,18 +1836,46 @@ function deletarMeta(id,nome){
 function setF(f,btn){curFilter=f;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render();}
 function applyFilters(){
   fSearch=document.getElementById('filterSearch')?.value||'';
-  fCat=document.getElementById('filterCat')?.value||'';
-  fCartao=document.getElementById('filterCartao')?.value||'';
-  fResp=document.getElementById('filterResp')?.value||'';
   renderList(getItems());
 }
 function clearFilters(){
-  fSearch='';fCat='';fCartao='';fResp='';
+  fSearch='';fCat=[];fCartao=[];fResp=[];
   const fs=document.getElementById('filterSearch');if(fs)fs.value='';
-  const fc=document.getElementById('filterCat');if(fc)fc.value='';
-  const fca=document.getElementById('filterCartao');if(fca)fca.value='';
-  const fr=document.getElementById('filterResp');if(fr)fr.value='';
   renderList(getItems());
+}
+function toggleFCat(v){fCat=mselToggle(fCat,v);renderList(getItems());}
+function toggleFCartao(v){fCartao=mselToggle(fCartao,v);renderList(getItems());}
+function toggleFResp(v){fResp=mselToggle(fResp,v);renderList(getItems());}
+
+// ── MULTISELECT (msel) ────────────────────────────────────
+function mselToggle(arr,v){return arr.includes(v)?arr.filter(x=>x!==v):[...arr,v];}
+function toggleMsel(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const wasOpen=el.classList.contains('open');
+  document.querySelectorAll('.msel.open').forEach(m=>m.classList.remove('open'));
+  if(!wasOpen)el.classList.add('open');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.msel'))document.querySelectorAll('.msel.open').forEach(m=>m.classList.remove('open'));
+});
+function renderMselOptions(panelId,options,selectedArr,toggleFnName){
+  const el=document.getElementById(panelId);
+  if(!el)return;
+  if(!options.length){el.innerHTML='<div class="msel-empty">Nenhuma opção</div>';return;}
+  el.innerHTML=options.map(o=>{
+    const val=(o&&typeof o==='object')?o.value:o;
+    const label=(o&&typeof o==='object')?o.label:o;
+    const checked=selectedArr.includes(val)?'checked':'';
+    const safeVal=String(val).replace(/'/g,"\\'");
+    return `<label class="msel-opt"><input type="checkbox" ${checked} onchange="${toggleFnName}('${safeVal}')"><span>${label}</span></label>`;
+  }).join('');
+}
+function updateMselBadge(badgeId,arr){
+  const b=document.getElementById(badgeId);
+  if(!b)return;
+  if(arr.length){b.textContent=arr.length;b.style.display='inline-flex';}
+  else b.style.display='none';
 }
 
 // ── EXPORT / IMPORT ────────────────────────────────────────
@@ -2359,7 +2614,8 @@ async function syncFromServer(){
     if(r2.ok){
       const rows=await r2.json();
       if(rows.length>0){
-        metas=rows.map(m=>({id:m.id,nome:m.nome,tipo:m.tipo||'teto',lim:m.lim?parseFloat(m.lim):null,cat:m.cat||null,cor:m.cor,iniM:m.ini_m,iniY:m.ini_y,fimM:m.fim_m,fimY:m.fim_y,totalObj:m.total_obj?parseFloat(m.total_obj):null,porMes:m.por_mes?parseFloat(m.por_mes):null}));
+        metas=rows.map((m,idx)=>({id:m.id,nome:m.nome,tipo:m.tipo||'teto',lim:m.lim?parseFloat(m.lim):null,cat:m.cat||null,cor:m.cor,iniM:m.ini_m,iniY:m.ini_y,fimM:m.fim_m,fimY:m.fim_y,totalObj:m.total_obj?parseFloat(m.total_obj):null,porMes:m.por_mes?parseFloat(m.por_mes):null,ordem:(m.ordem!=null?m.ordem:idx)}))
+          .sort((a,b)=>a.ordem-b.ordem);
         localStorage.setItem('fluxo_metas3',JSON.stringify(metas));
       } else if(metas.length>0){
         for(const m of metas) await sbSaveMeta(m);
@@ -2430,7 +2686,7 @@ async function sbDeleteItem(id){
 // ── UPSERT meta ────────────────────────────────────────────
 async function sbSaveMeta(m){
   try{
-    const row={id:m.id,user_id:SB_UID,nome:m.nome,lim:m.lim||null,cat:m.cat||null,cor:m.cor,ini_m:m.iniM,ini_y:m.iniY,fim_m:m.fimM,fim_y:m.fimY,tipo:m.tipo||'teto',total_obj:m.totalObj||null,por_mes:m.porMes||null};
+    const row={id:m.id,user_id:SB_UID,nome:m.nome,lim:m.lim||null,cat:m.cat||null,cor:m.cor,ini_m:m.iniM,ini_y:m.iniY,fim_m:m.fimM,fim_y:m.fimY,tipo:m.tipo||'teto',total_obj:m.totalObj||null,por_mes:m.porMes||null,ordem:m.ordem!=null?m.ordem:null};
     await fetch(sbUrl('metas'),{method:'POST',headers:{...sbH(),'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(row)});
   }catch(e){console.warn('sbSaveMeta offline',e);}
 }
