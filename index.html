@@ -129,15 +129,29 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
 .empty{text-align:center;padding:32px 0;color:var(--t3);font-size:13px;font-weight:500}
 
 /* METAS */
-.meta-card{background:var(--bg2);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;box-shadow:var(--shadow)}
+.meta-card{background:var(--bg2);border:1px solid var(--b);border-radius:var(--r);margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:stretch;overflow:hidden}
+.meta-content{flex:1;min-width:0;padding:14px 16px 14px 4px}
+.meta-top-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.meta-icon-actions{display:flex;gap:6px;flex-shrink:0}
+.micon{width:30px;height:30px;border-radius:9px;border:1.5px solid var(--b2);background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.micon svg{width:14px;height:14px}
+.micon-add{border-color:var(--green);color:var(--green)}
+.micon-edit{border-color:var(--b3);color:var(--t2)}
+.micon-del{border-color:var(--red);color:var(--red)}
+.meta-title{font-size:15px;font-weight:700;color:var(--t);margin-bottom:8px;line-height:1.3}
+.meta-stats-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:7px}
+.meta-stats-text{font-size:12px;color:var(--t3);font-weight:500;line-height:1.4}
+.meta-stats-text .v{color:var(--t);font-weight:700}
+.meta-pct-badge{font-size:13px;font-weight:800;font-family:'Manrope',sans-serif;flex-shrink:0}
 .meta-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
 .meta-name{font-size:13px;font-weight:700;color:var(--t)}
 .meta-vals{font-size:11px;color:var(--t3);font-weight:600}
-.meta-track{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.meta-track{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
 .meta-fill{height:100%;border-radius:3px;transition:width .5s ease}
 .meta-footer{display:flex;justify-content:space-between;margin-top:6px}
 .meta-pct{font-size:11px;font-weight:700}
 .meta-period{font-size:10px;color:var(--t3);font-weight:500}
+.meta-period-row{font-size:11px;color:var(--t3);font-weight:500;margin-top:8px}
 .rec-manage-btn{background:none;border:none;color:var(--blue);font-size:11px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;padding:2px 6px;border-radius:4px}
 .rec-manage-btn.del{color:var(--red)}
 .rec-card{background:var(--bg2);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow);border-left:3px solid var(--blue)}
@@ -149,10 +163,19 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
 .meta-tipo-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;border-radius:4px;padding:2px 7px;margin-bottom:6px}
 .meta-tipo-teto{background:var(--rbg);color:var(--red)}
 .meta-tipo-econ{background:var(--gbg);color:var(--green)}
+.meta-badge-pill{display:inline-flex;align-items:center;font-size:11px;font-weight:700;border-radius:50px;padding:4px 12px}
+.meta-badge-pill.tipo-teto{background:var(--rbg);color:var(--red)}
+.meta-badge-pill.tipo-econ{background:var(--gbg);color:var(--green)}
 .meta-actions{display:flex;gap:6px;margin-top:8px}
 .meta-btn{flex:1;background:none;border:1px solid var(--b2);border-radius:var(--rs);padding:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--t3)}
 .meta-btn.edit{color:var(--blue);border-color:var(--blue)}
 .meta-btn.del{color:var(--red);border-color:var(--red)}
+.meta-expand-toggle{display:flex;align-items:center;gap:6px;background:none;border:none;padding:8px 0 0;margin:0;font-size:11px;color:var(--t3);font-weight:600;cursor:pointer;width:100%;text-align:left;font-family:'Plus Jakarta Sans',sans-serif}
+.meta-expand-toggle svg{width:11px;height:11px;transition:transform .2s;flex-shrink:0}
+.meta-expand-toggle.open svg{transform:rotate(180deg)}
+.meta-expand{display:none}
+.meta-expand.open{display:block}
+
 
 /* HISTORICO */
 .hist-month{background:var(--bg2);border-radius:var(--r);margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow)}
@@ -340,6 +363,8 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
 .msel-opt:active{background:var(--bg3)}
 .msel-opt input{width:14px;height:14px;accent-color:var(--blue);flex-shrink:0;cursor:pointer}
 .msel-empty{padding:10px 8px;font-size:11px;color:var(--t3);text-align:center}
+.msel-all{font-weight:700;color:var(--blue)}
+.msel-divider{height:1px;background:var(--b);margin:4px 2px 6px}
 
 /* ── V3.1 — TOTALIZADOR DE FILTRO ──────────────────────── */
 .filter-total{display:none;align-items:center;justify-content:space-between;background:var(--bg2);border:1.5px solid var(--b2);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;box-shadow:var(--shadow)}
@@ -353,6 +378,10 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
 .hist-tabs .fbtn{flex:1;text-align:center}
 .hist-month.current{border:1.5px solid var(--blue);box-shadow:0 4px 16px rgba(59,108,244,0.15)}
 .hm-tag-atual{display:inline-block;background:var(--bbg);color:var(--blue);font-size:9px;font-weight:700;letter-spacing:.5px;border-radius:4px;padding:2px 6px;margin-left:6px;vertical-align:middle}
+.period-bar-chart .bar-name{width:54px;font-size:10px}
+.period-bar-chart .bar-val{min-width:84px;font-size:11px;font-weight:700;font-family:'Manrope',sans-serif}
+.period-bar-chart .bar-row-current{background:var(--bbg);border-radius:8px;margin:0 -6px;padding:0 6px}
+.period-bar-chart .bar-row-current .bar-name{color:var(--blue);font-weight:800}
 .period-nav{display:flex;align-items:center;justify-content:center;gap:14px;background:var(--bg2);border-radius:var(--r);padding:10px;margin-bottom:12px;box-shadow:var(--shadow)}
 .period-nav button{background:var(--bg3);border:none;width:28px;height:28px;border-radius:50%;font-size:16px;color:var(--t2);cursor:pointer}
 .period-nav .ml{font-size:13px;font-weight:700;color:var(--t);min-width:110px;text-align:center}
@@ -360,8 +389,9 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
 /* ── V3.1 — METAS: DRAG AND DROP ───────────────────────── */
 .meta-card{position:relative;touch-action:pan-y}
 .meta-card.dragging{box-shadow:var(--shadow-lg);z-index:20;opacity:.92}
-.meta-drag{display:flex;align-items:center;justify-content:center;width:100%;padding-bottom:8px;margin-bottom:8px;border-bottom:1px dashed var(--b2);color:var(--t3);font-size:13px;letter-spacing:5px;cursor:grab;touch-action:none;user-select:none}
-.meta-drag:active{cursor:grabbing;color:var(--blue);border-color:var(--blue)}
+.meta-drag{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:26px;color:var(--t3);cursor:grab;touch-action:none;user-select:none}
+.meta-drag svg{width:9px;height:15px;pointer-events:none}
+.meta-drag:active{cursor:grabbing;color:var(--blue)}
 </style>
 </head>
 <body>
@@ -570,7 +600,7 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
             </div>
           </div>
         </div>
-        <div class="slabel" style="margin-bottom:12px">6 meses atrás → 6 meses à frente</div>
+        <div class="slabel" style="margin-bottom:12px">saldo por mês (entradas − saídas) · 6 meses atrás → 6 meses à frente</div>
         <div id="histPeriodoList"></div>
       </div>
     </div>
@@ -932,11 +962,11 @@ function renderList(items){
   const IC={'Alimentação - Necessidade':'🍽','Alimentação - Saídas':'🍔','Mercantil':'🛒','Saúde':'💊','Assinaturas':'📱','Impostos':'🏛','Custo fixo':'🔒','Carro - Transporte':'🚗','Casa':'🏠','Presentes':'🎁','Viagem':'✈️','Estudos/Capacitação':'📚','Gastos Extras':'💸','Gastos dos Outros':'👥','Compras Pessoais':'🛍','Comunidade':'🤝','Maria Áurea':'👶','Doce Áurea':'🍫','Salário':'💼','Freelance':'💻','Investimentos':'📈','Fatura':'💳','Reembolso':'↩️','Anuidade':'🔖','Outros':'📌'};
   // popula opções das multisseleções (categoria dinâmica pelo mês; cartão/forma fixos)
   const usedCats=[...new Set(items.map(i=>i.cat).filter(Boolean))].sort();
-  renderMselOptions('mselCatPanel',usedCats,fCat,'toggleFCat');
+  renderMselOptions('mselCatPanel',usedCats,fCat,'toggleFCat','setAllFCat');
   updateMselBadge('mselCatBadge',fCat);
-  renderMselOptions('mselCartaoPanel',Object.entries(CARD_NAMES).map(([value,label])=>({value,label})),fCartao,'toggleFCartao');
+  renderMselOptions('mselCartaoPanel',Object.entries(CARD_NAMES).map(([value,label])=>({value,label})),fCartao,'toggleFCartao','setAllFCartao');
   updateMselBadge('mselCartaoBadge',fCartao);
-  renderMselOptions('mselRespPanel',['Crédito','Débito','Adicional','Família Brenda'],fResp,'toggleFResp');
+  renderMselOptions('mselRespPanel',['Crédito','Débito','Adicional','Família Brenda'],fResp,'toggleFResp','setAllFResp');
   updateMselBadge('mselRespBadge',fResp);
   let fil=(curFilter==='todos'?items:items.filter(i=>i.tipo===curFilter));
   // apply advanced filters
@@ -1214,14 +1244,17 @@ function chMPeriodo(d){
 function togglePfCat(v){pfCat=mselToggle(pfCat,v);renderPeriodoFilters();renderHistPeriodo();}
 function togglePfCartao(v){pfCartao=mselToggle(pfCartao,v);renderPeriodoFilters();renderHistPeriodo();}
 function togglePfResp(v){pfResp=mselToggle(pfResp,v);renderPeriodoFilters();renderHistPeriodo();}
+function setAllPfCat(checked){const usedCats=[...new Set(data.map(i=>i.cat).filter(Boolean))];pfCat=checked?usedCats:[];renderPeriodoFilters();renderHistPeriodo();}
+function setAllPfCartao(checked){pfCartao=checked?Object.keys(CARD_NAMES):[];renderPeriodoFilters();renderHistPeriodo();}
+function setAllPfResp(checked){pfResp=checked?['Crédito','Débito','Adicional','Família Brenda']:[];renderPeriodoFilters();renderHistPeriodo();}
 function clearPeriodoFilters(){pfCat=[];pfCartao=[];pfResp=[];renderPeriodoFilters();renderHistPeriodo();}
 function renderPeriodoFilters(){
   const usedCats=[...new Set(data.map(i=>i.cat).filter(Boolean))].sort();
-  renderMselOptions('mselPCatPanel',usedCats,pfCat,'togglePfCat');
+  renderMselOptions('mselPCatPanel',usedCats,pfCat,'togglePfCat','setAllPfCat');
   updateMselBadge('mselPCatBadge',pfCat);
-  renderMselOptions('mselPCartaoPanel',Object.entries(CARD_NAMES).map(([value,label])=>({value,label})),pfCartao,'togglePfCartao');
+  renderMselOptions('mselPCartaoPanel',Object.entries(CARD_NAMES).map(([value,label])=>({value,label})),pfCartao,'togglePfCartao','setAllPfCartao');
   updateMselBadge('mselPCartaoBadge',pfCartao);
-  renderMselOptions('mselPRespPanel',['Crédito','Débito','Adicional','Família Brenda'],pfResp,'togglePfResp');
+  renderMselOptions('mselPRespPanel',['Crédito','Débito','Adicional','Família Brenda'],pfResp,'togglePfResp','setAllPfResp');
   updateMselBadge('mselPRespBadge',pfResp);
   const clearBtn=document.getElementById('clearPeriodoFiltersBtn');
   if(clearBtn)clearBtn.style.display=(pfCat.length||pfCartao.length||pfResp.length)?'inline-flex':'none';
@@ -1247,28 +1280,22 @@ function renderHistPeriodo(){
   }
   const el=document.getElementById('histPeriodoList');
   if(!el)return;
-  el.innerHTML=months.map(({m,y})=>{
+  const rows=months.map(({m,y})=>{
     const items=getFilteredPeriodoItems(m,y);
     const ent=items.filter(i=>i.tipo==='entrada').reduce((a,i)=>a+i.valor,0);
     const sai=items.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i)).reduce((a,i)=>a+i.valor,0);
-    const isCur=m===pRefM&&y===pRefY;
-    const k=`p-${y}-${m}`;
-    const byCat={};items.filter(i=>i.tipo==='saida').forEach(i=>{byCat[i.cat]=(byCat[i.cat]||0)+i.valor;});
-    const cats=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
-    return `<div class="hist-month ${isCur?'current':''}">
-      <div class="hist-month-head" onclick="toggleHist('${k}')">
-        <span class="hm-title">${MS[m]} ${y}${isCur?'<span class="hm-tag-atual">atual</span>':''}</span>
-        <span class="hm-bal">${items.length} ${items.length===1?'item':'itens'}</span>
-      </div>
-      <div class="hm-body" id="hm-${k}">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 0 8px">
-          <div style="text-align:center"><div style="font-size:10px;color:var(--t3);margin-bottom:2px">Entradas</div><div style="font-size:13px;font-weight:600;color:var(--green);font-family:'JetBrains Mono',monospace">${fmt(ent)}</div></div>
-          <div style="text-align:center"><div style="font-size:10px;color:var(--t3);margin-bottom:2px">Saídas</div><div style="font-size:13px;font-weight:600;color:var(--red);font-family:'JetBrains Mono',monospace">${fmt(sai)}</div></div>
-        </div>
-        ${items.length?cats.map(([cat,val])=>`<div class="hm-row"><span class="hm-cat">${cat}</span><span class="hm-val">${fmt(val)}</span></div>`).join(''):'<div class="empty" style="padding:12px 0">Nenhum lançamento</div>'}
-      </div>
+    return{m,y,saldo:ent-sai,isCur:m===pRefM&&y===pRefY};
+  });
+  const maxAbs=Math.max(1,...rows.map(r=>Math.abs(r.saldo)));
+  el.innerHTML=`<div class="chart-box"><div class="bar-chart period-bar-chart">${rows.map(r=>{
+    const pct=Math.round(Math.abs(r.saldo)/maxAbs*100);
+    const cor=r.saldo>=0?'var(--green)':'var(--red)';
+    return`<div class="bar-row${r.isCur?' bar-row-current':''}">
+      <span class="bar-name">${MS[r.m].slice(0,3)}/${String(r.y).slice(2)}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${cor}"></div></div>
+      <span class="bar-val" style="color:${cor}">${fmt(r.saldo)}</span>
     </div>`;
-  }).join('');
+  }).join('')}</div></div>`;
 }
 
 // ── METAS ──────────────────────────────────────────────────
@@ -1278,6 +1305,12 @@ function renderMetas(){
   const el=document.getElementById('metasEl');
   if(!el)return;
 
+  const ICO_GRIP='<svg viewBox="0 0 10 16" fill="currentColor"><circle cx="2.5" cy="2.5" r="1.5"/><circle cx="7.5" cy="2.5" r="1.5"/><circle cx="2.5" cy="8" r="1.5"/><circle cx="7.5" cy="8" r="1.5"/><circle cx="2.5" cy="13.5" r="1.5"/><circle cx="7.5" cy="13.5" r="1.5"/></svg>';
+  const ICO_PLUS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+  const ICO_PENCIL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+  const ICO_TRASH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+  const ICO_CHEV='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
   let html=metas.map(m=>{
     const iniM=m.iniM,iniY=m.iniY,fimM=m.fimM,fimY=m.fimY;
     // check if current month is within meta period
@@ -1285,7 +1318,7 @@ function renderMetas(){
     const iniKey=iniY*100+iniM;
     const fimKey=fimY*100+fimM;
     const isAtiva=curKey>=iniKey&&curKey<=fimKey;
-    const periodo=iniM===fimM&&iniY===fimY?mStr(iniM,iniY):`${mStr(iniM,iniY)} → ${mStr(fimM,fimY)}`;
+    const periodo=iniM===fimM&&iniY===fimY?mStr(iniM,iniY):`${mStr(iniM,iniY)} – ${mStr(fimM,fimY)}`;
 
     if(m.tipo==='teto'){
       // only count gastos within the exact period
@@ -1297,18 +1330,22 @@ function renderMetas(){
       const pct=m.lim>0?Math.min(gasto/m.lim*100,100):0;
       const cor=pct>=100?'var(--red)':pct>=80?'var(--amber)':m.cor||'var(--green)';
       return `<div class="meta-card" data-meta-id="${m.id}">
-        <div class="meta-drag" data-meta-id="${m.id}">⠿⠿⠿</div>
-        <div class="meta-tipo-badge meta-tipo-teto">🎯 Teto de gastos</div>
-        <div class="meta-head"><span class="meta-name">${m.nome}</span><span class="meta-vals">${fmt(gasto)} / ${fmt(m.lim)}</span></div>
-        <div class="meta-track"><div class="meta-fill" style="width:${pct}%;background:${cor}"></div></div>
-        <div class="meta-footer">
-          <span class="meta-pct" style="color:${cor}">${Math.round(pct)}% do teto</span>
-          <span class="meta-period">${periodo}</span>
-        </div>
-        ${!isAtiva?`<div style="font-size:10px;color:var(--t3);margin-top:4px">${curKey<iniKey?'Ainda não iniciada':'Encerrada'}</div>`:''}
-        <div class="meta-actions">
-          <button class="meta-btn edit" onclick="openMetaModal('${m.id}')">✏️ Editar</button>
-          <button class="meta-btn del" onclick="deletarMeta('${m.id}','${m.nome}')">🗑 Excluir</button>
+        <div class="meta-drag" data-meta-id="${m.id}">${ICO_GRIP}</div>
+        <div class="meta-content">
+          <div class="meta-top-row">
+            <span class="meta-badge-pill tipo-teto">Teto de gastos</span>
+            <div class="meta-icon-actions">
+              <button class="micon micon-edit" onclick="openMetaModal('${m.id}')" title="Editar">${ICO_PENCIL}</button>
+              <button class="micon micon-del" onclick="deletarMeta('${m.id}','${m.nome}')" title="Excluir">${ICO_TRASH}</button>
+            </div>
+          </div>
+          <div class="meta-title">${m.nome}</div>
+          <div class="meta-stats-row">
+            <span class="meta-stats-text"><span class="v">${fmt(gasto)}</span> de <span class="v">${fmt(m.lim)}</span> · resta <span class="v">${fmt(Math.max(0,m.lim-gasto))}</span></span>
+            <span class="meta-pct-badge" style="color:${cor}">${Math.round(pct)}%</span>
+          </div>
+          <div class="meta-track"><div class="meta-fill" style="width:${pct}%;background:${cor}"></div></div>
+          <div class="meta-period-row">${periodo}${!isAtiva?` · ${curKey<iniKey?'Ainda não iniciada':'Encerrada'}`:''}</div>
         </div>
       </div>`;
     } else {
@@ -1339,34 +1376,25 @@ function renderMetas(){
           </div>`).join('')}
       </div>`:'';
       return `<div class="meta-card" data-meta-id="${m.id}">
-        <div class="meta-drag" data-meta-id="${m.id}">⠿⠿⠿</div>
-        <div class="meta-tipo-badge meta-tipo-econ">💰 Meta de economia</div>
-        <div class="meta-head"><span class="meta-name">${m.nome}</span><span class="meta-vals">${fmt(acumulado)} / ${fmt(totalObj)}</span></div>
-        <div class="meta-track"><div class="meta-fill" style="width:${pct}%;background:${cor}"></div></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:8px;margin-bottom:4px">
-          <div style="text-align:center;background:var(--bg3);border-radius:6px;padding:6px 4px">
-            <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px">META/MÊS</div>
-            <div style="font-size:12px;font-weight:700;color:var(--t);font-family:'Manrope',sans-serif">${fmt(porMes)}</div>
+        <div class="meta-drag" data-meta-id="${m.id}">${ICO_GRIP}</div>
+        <div class="meta-content">
+          <div class="meta-top-row">
+            <span class="meta-badge-pill tipo-econ">Meta de economia</span>
+            <div class="meta-icon-actions">
+              <button class="micon micon-add" onclick="openAporteModal('${m.id}','${m.nome}')" title="Registrar aporte">${ICO_PLUS}</button>
+              <button class="micon micon-edit" onclick="openMetaModal('${m.id}')" title="Editar">${ICO_PENCIL}</button>
+              <button class="micon micon-del" onclick="deletarMeta('${m.id}','${m.nome}')" title="Excluir">${ICO_TRASH}</button>
+            </div>
           </div>
-          <div style="text-align:center;background:var(--bg3);border-radius:6px;padding:6px 4px">
-            <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px">APORTES</div>
-            <div style="font-size:12px;font-weight:700;color:var(--t);font-family:'Manrope',sans-serif">${aportesDA.length}</div>
+          <div class="meta-title">${m.nome}</div>
+          <div class="meta-stats-row">
+            <span class="meta-stats-text"><span class="v">${fmt(acumulado)}</span> de <span class="v">${fmt(totalObj)}</span> · falta <span class="v">${fmt(Math.max(0,totalObj-acumulado))}</span></span>
+            <span class="meta-pct-badge" style="color:${cor}">${Math.round(pct)}%</span>
           </div>
-          <div style="text-align:center;background:var(--bg3);border-radius:6px;padding:6px 4px">
-            <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px">FALTA</div>
-            <div style="font-size:12px;font-weight:700;color:${cor};font-family:'Manrope',sans-serif">${fmt(Math.max(0,totalObj-acumulado))}</div>
-          </div>
-        </div>
-        ${aportesHtml}
-        <div class="meta-footer" style="margin-top:8px">
-          <span class="meta-pct" style="color:${cor}">${Math.round(pct)}% do objetivo</span>
-          <span class="meta-period">${periodo} · ${totalMeses} ${totalMeses===1?'mês':'meses'}</span>
-        </div>
-        ${!isAtiva?`<div style="font-size:10px;color:${pct>=100?'var(--green)':'var(--t3)'};margin-top:4px">${curKey<iniKey?'Ainda não iniciada':pct>=100?'🎉 Objetivo alcançado!':'Encerrada'}</div>`:''}
-        <div class="meta-actions">
-          <button class="meta-btn" onclick="openAporteModal('${m.id}','${m.nome}')" style="color:var(--green);border-color:var(--green)">+ Registrar aporte</button>
-          <button class="meta-btn edit" onclick="openMetaModal('${m.id}')">✏️</button>
-          <button class="meta-btn del" onclick="deletarMeta('${m.id}','${m.nome}')">🗑</button>
+          <div class="meta-track"><div class="meta-fill" style="width:${pct}%;background:${cor}"></div></div>
+          <div class="meta-period-row">${periodo} · ${totalMeses} ${totalMeses===1?'mês':'meses'}${!isAtiva?` · ${curKey<iniKey?'Ainda não iniciada':(pct>=100?'🎉 Objetivo alcançado!':'Encerrada')}`:''}</div>
+          ${aportesDA.length?`<button class="meta-expand-toggle" onclick="toggleMetaExpand('${m.id}')" id="metaExpBtn-${m.id}">${ICO_CHEV}<span>${aportesDA.length} aporte${aportesDA.length!==1?'s':''} · meta/mês ${fmt(porMes)}</span></button>
+          <div class="meta-expand" id="metaExp-${m.id}">${aportesHtml}</div>`:''}
         </div>
       </div>`;
     }
@@ -1375,6 +1403,13 @@ function renderMetas(){
   html+=`<button class="add-meta" onclick="openMetaModal()">+ Nova meta</button>`;
   el.innerHTML=html;
   initMetaDrag();
+}
+
+function toggleMetaExpand(id){
+  const box=document.getElementById('metaExp-'+id);
+  const btn=document.getElementById('metaExpBtn-'+id);
+  if(box)box.classList.toggle('open');
+  if(btn)btn.classList.toggle('open');
 }
 
 // ── METAS: DRAG AND DROP PARA REORDENAR ───────────────────
@@ -1846,6 +1881,9 @@ function clearFilters(){
 function toggleFCat(v){fCat=mselToggle(fCat,v);renderList(getItems());}
 function toggleFCartao(v){fCartao=mselToggle(fCartao,v);renderList(getItems());}
 function toggleFResp(v){fResp=mselToggle(fResp,v);renderList(getItems());}
+function setAllFCat(checked){const usedCats=[...new Set(getItems().map(i=>i.cat).filter(Boolean))];fCat=checked?usedCats:[];renderList(getItems());}
+function setAllFCartao(checked){fCartao=checked?Object.keys(CARD_NAMES):[];renderList(getItems());}
+function setAllFResp(checked){fResp=checked?['Crédito','Débito','Adicional','Família Brenda']:[];renderList(getItems());}
 
 // ── MULTISELECT (msel) ────────────────────────────────────
 function mselToggle(arr,v){return arr.includes(v)?arr.filter(x=>x!==v):[...arr,v];}
@@ -1859,17 +1897,21 @@ function toggleMsel(id){
 document.addEventListener('click',function(e){
   if(!e.target.closest('.msel'))document.querySelectorAll('.msel.open').forEach(m=>m.classList.remove('open'));
 });
-function renderMselOptions(panelId,options,selectedArr,toggleFnName){
+function renderMselOptions(panelId,options,selectedArr,toggleFnName,setAllFnName){
   const el=document.getElementById(panelId);
   if(!el)return;
   if(!options.length){el.innerHTML='<div class="msel-empty">Nenhuma opção</div>';return;}
-  el.innerHTML=options.map(o=>{
+  const allVals=options.map(o=>(o&&typeof o==='object')?o.value:o);
+  const allChecked=allVals.length>0&&allVals.every(v=>selectedArr.includes(v));
+  let html=setAllFnName?`<label class="msel-opt msel-all"><input type="checkbox" ${allChecked?'checked':''} onchange="${setAllFnName}(this.checked)"><span>Selecionar tudo</span></label><div class="msel-divider"></div>`:'';
+  html+=options.map(o=>{
     const val=(o&&typeof o==='object')?o.value:o;
     const label=(o&&typeof o==='object')?o.label:o;
     const checked=selectedArr.includes(val)?'checked':'';
     const safeVal=String(val).replace(/'/g,"\\'");
     return `<label class="msel-opt"><input type="checkbox" ${checked} onchange="${toggleFnName}('${safeVal}')"><span>${label}</span></label>`;
   }).join('');
+  el.innerHTML=html;
 }
 function updateMselBadge(badgeId,arr){
   const b=document.getElementById(badgeId);
