@@ -308,9 +308,16 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
 .pessoa-pgto-item{display:flex;justify-content:space-between;padding:4px 0;font-size:11px}
 .pessoa-pgto-desc{color:var(--t2);font-weight:500}
 .pessoa-pgto-val{color:var(--green);font-weight:700;font-family:'Manrope',sans-serif}
-.pessoa-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 16px 14px}
+.pessoa-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;padding:10px 16px 14px}
 .btn-receber{background:var(--green);border:none;border-radius:var(--rs);padding:9px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;color:#fff;cursor:pointer}
 .btn-add-gasto{background:var(--bbg);border:1px solid var(--blue);border-radius:var(--rs);padding:9px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;color:var(--blue);cursor:pointer}
+.btn-cobranca{background:var(--pbg);border:1px solid var(--purple);border-radius:var(--rs);padding:9px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;color:var(--purple);cursor:pointer}
+.cobranca-opt{width:100%;display:flex;align-items:center;gap:12px;background:var(--bg3);border:1.5px solid var(--b2);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;cursor:pointer;text-align:left;transition:border-color .15s}
+.cobranca-opt:active{border-color:var(--purple);background:var(--pbg)}
+.cobranca-opt-ico{font-size:22px;flex-shrink:0}
+.cobranca-opt-txt{display:flex;flex-direction:column;gap:2px}
+.cobranca-opt-title{font-size:13px;font-weight:700;color:var(--t)}
+.cobranca-opt-sub{font-size:11px;color:var(--t3);font-weight:500}
 .add-grupo-btn{width:100%;background:none;border:2px dashed var(--b2);border-radius:var(--r);padding:12px;font-size:12px;color:var(--t3);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:600;box-shadow:var(--shadow);background:var(--bg2)}
 .pessoas-mnav{display:flex;gap:6px;margin-bottom:14px}
 .pessoas-tab{flex:1;padding:8px;border-radius:var(--rs);border:1.5px solid var(--b2);background:var(--bg2);font-size:11px;font-weight:700;color:var(--t3);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-align:center}
@@ -885,6 +892,36 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
   </div>
 </div>
 
+<!-- MODAL COBRANÇA (extrair/enviar) -->
+<div class="mbg" id="mbgCobranca" onclick="closeCobrancaBg(event)">
+  <div class="modal">
+    <div class="m-handle"></div>
+    <div class="m-title">Enviar cobrança</div>
+    <div style="background:var(--bg3);border-radius:var(--rs);padding:10px 12px;margin-bottom:16px;font-size:12px;color:var(--t2)">
+      Para: <strong id="cobrancaNome" style="color:var(--t)"></strong><br>
+      Período: <strong id="cobrancaPeriodo" style="color:var(--t)"></strong> ·
+      Total: <strong id="cobrancaTotal" style="color:var(--red)"></strong>
+    </div>
+    <button class="cobranca-opt" onclick="compartilharTextoCobranca()">
+      <span class="cobranca-opt-ico">💬</span>
+      <span class="cobranca-opt-txt">
+        <span class="cobranca-opt-title">Texto (WhatsApp)</span>
+        <span class="cobranca-opt-sub">Compartilha ou copia a lista formatada</span>
+      </span>
+    </button>
+    <button class="cobranca-opt" onclick="gerarImagemCobranca()">
+      <span class="cobranca-opt-ico">🖼️</span>
+      <span class="cobranca-opt-txt">
+        <span class="cobranca-opt-title">Imagem (recibo)</span>
+        <span class="cobranca-opt-sub">Gera um cartão visual pra enviar</span>
+      </span>
+    </button>
+    <div class="m-actions" style="margin-top:6px">
+      <button class="btn-c" onclick="closeCobrancaModal()" style="width:100%">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── CONSTANTS ──────────────────────────────────────────────
 const MS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -909,6 +946,7 @@ let pRefM=new Date().getMonth(),pRefY=new Date().getFullYear();
 const fmt=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const fmtD=s=>{if(!s)return'';const p=s.split('-');return`${p[2]}/${p[1]}`};
 const mStr=(m,y)=>`${MS[m].slice(0,3)} ${y}`;
+const escJs=s=>String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 const getKey=(m,y)=>`${m}-${y}`;
 const getItems=(m,y)=>data.filter(i=>i.fatM===(m??curM)&&i.fatY===(y??curY));
 
@@ -2267,6 +2305,7 @@ function renderPessoas(){
             ${renderPendenciasHtml(pendencias,null,'grupo_'+grupo.id)}
             <div class="pessoa-actions">
               <button class="btn-receber" onclick="openReceberGrupoModal('${grupo.id}','${grupo.nome}',${totalPendente})">↓ Registrar recebimento</button>
+              <button class="btn-cobranca" onclick="openCobrancaModal('${grupo.id}','${escJs(grupo.nome)}','grupo')">📤 Cobrança</button>
             </div>
           </div>
         </div>`;
@@ -2302,6 +2341,7 @@ function renderPessoas(){
             <div class="pessoa-actions">
               <button class="btn-receber" onclick="openReceberModal('${pessoa.id}','${pessoa.nome}',${totalPendente})">↓ Registrar recebimento</button>
               <button class="btn-add-gasto" onclick="openModalParaPessoa('${pessoa.id}','${pessoa.nome}')">+ Novo gasto</button>
+              <button class="btn-cobranca" onclick="openCobrancaModal('${pessoa.id}','${escJs(pessoa.nome)}','pessoa')">📤 Cobrança</button>
             </div>
           </div>
         </div>`;
@@ -2349,6 +2389,187 @@ function renderPessoas(){
 function togglePessoa(id){
   const el=document.getElementById(id);
   if(el)el.classList.toggle('open');
+}
+
+// ── COBRANÇA (extrair/enviar gastos de uma pessoa/grupo) ────
+let _cobrancaCtx=null;
+
+function openCobrancaModal(id,nome,tipo){
+  _cobrancaCtx={id,nome,tipo};
+  const d=getCobrancaData();
+  document.getElementById('cobrancaNome').textContent=d.nome;
+  document.getElementById('cobrancaPeriodo').textContent=d.mesLabel;
+  document.getElementById('cobrancaTotal').textContent=fmt(d.total);
+  document.getElementById('mbgCobranca').classList.add('open');
+}
+function closeCobrancaModal(){document.getElementById('mbgCobranca').classList.remove('open');}
+function closeCobrancaBg(e){if(e.target===document.getElementById('mbgCobranca'))closeCobrancaModal();}
+
+function getCobrancaData(){
+  const {id,nome,tipo}=_cobrancaCtx;
+  let itens;
+  if(tipo==='grupo'){
+    const grupo=grupos.find(g=>g.id===id);
+    itens=grupo?getGastosGrupo(grupo,curM,curY):[];
+  }else{
+    itens=getGastosComPessoa(id,curM,curY);
+  }
+  itens=itens.slice().sort((a,b)=>(a.dataLanc||'').localeCompare(b.dataLanc||''));
+  const total=itens.reduce((a,i)=>a+i.valor,0);
+  return {nome,itens,total,mesLabel:mStr(curM,curY)};
+}
+
+function textoCobranca(){
+  const d=getCobrancaData();
+  if(!d.itens.length)return `Oi ${d.nome}! Nenhum gasto lançado na fatura de ${d.mesLabel}.`;
+  const linhas=d.itens.map((it,i)=>`${i+1}. ${it.desc} — ${fmtD(it.dataLanc)} — ${fmt(it.valor)}`).join('\n');
+  return `*Cobrança — ${d.mesLabel}*\nPara: ${d.nome}\n\n${linhas}\n\n*Total: ${fmt(d.total)}*`;
+}
+
+async function compartilharTextoCobranca(){
+  const texto=textoCobranca();
+  if(navigator.share){
+    try{
+      await navigator.share({text:texto,title:'Cobrança'});
+      closeCobrancaModal();
+      return;
+    }catch(e){
+      if(e && e.name==='AbortError')return; // usuário cancelou o share
+    }
+  }
+  try{
+    await navigator.clipboard.writeText(texto);
+    showToast('Texto copiado! Cole no WhatsApp.');
+    closeCobrancaModal();
+  }catch(e){
+    showToast('Não foi possível copiar o texto');
+  }
+}
+
+function _roundRectPath(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function _roundRectTopPath(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x,y+h);
+  ctx.lineTo(x,y+r);
+  ctx.arcTo(x,y,x+r,y,r);
+  ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h);
+  ctx.closePath();
+}
+
+async function gerarImagemCobranca(){
+  const d=getCobrancaData();
+  if(document.fonts && document.fonts.ready){try{await document.fonts.ready;}catch(e){}}
+
+  const W=680,pad=24,headerH=88,rowH=46,footerH=56;
+  const nRows=Math.max(d.itens.length,1);
+  const H=pad*2+headerH+nRows*rowH+footerH;
+
+  const canvas=document.createElement('canvas');
+  const scale=2; // retina
+  canvas.width=W*scale;canvas.height=H*scale;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(scale,scale);
+
+  // fundo
+  ctx.fillStyle='#F7F8FA';ctx.fillRect(0,0,W,H);
+  // cartão
+  ctx.fillStyle='#FFFFFF';
+  _roundRectPath(ctx,pad,pad,W-pad*2,H-pad*2,18);ctx.fill();
+  // header
+  ctx.save();
+  _roundRectPath(ctx,pad,pad,W-pad*2,headerH,18);ctx.clip();
+  ctx.fillStyle='#3B6CF4';ctx.fillRect(pad,pad,W-pad*2,headerH);
+  ctx.restore();
+  ctx.fillStyle='#FFFFFF';
+  ctx.textBaseline='alphabetic';
+  ctx.font='800 21px Manrope, sans-serif';
+  ctx.fillText('Cobrança',pad+22,pad+36);
+  ctx.font='600 13px "Plus Jakarta Sans", sans-serif';
+  ctx.fillStyle='rgba(255,255,255,0.85)';
+  ctx.fillText(`${d.nome}  ·  ${d.mesLabel}`,pad+22,pad+60);
+
+  // itens
+  let y=pad+headerH;
+  if(!d.itens.length){
+    ctx.fillStyle='#9AA5B4';
+    ctx.font='500 13px "Plus Jakarta Sans", sans-serif';
+    ctx.textBaseline='middle';
+    ctx.fillText('Nenhum gasto neste período',pad+22,y+rowH/2);
+    y+=rowH;
+  }else{
+    d.itens.forEach((it,idx)=>{
+      if(idx%2===1){ctx.fillStyle='#F5F6F9';ctx.fillRect(pad,y,W-pad*2,rowH);}
+      const midY=y+rowH/2;
+      ctx.textBaseline='middle';
+      ctx.fillStyle='#0F1923';
+      ctx.font='700 14px "Plus Jakarta Sans", sans-serif';
+      let desc=it.desc||'';
+      if(desc.length>36)desc=desc.slice(0,35)+'…';
+      ctx.fillText(desc,pad+22,midY-8);
+      ctx.fillStyle='#9AA5B4';
+      ctx.font='500 11px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(`${it.cat||''} · ${fmtD(it.dataLanc)}`,pad+22,midY+10);
+      ctx.fillStyle='#0F1923';
+      ctx.font='700 14px Manrope, sans-serif';
+      ctx.textAlign='right';
+      ctx.fillText(fmt(it.valor),W-pad-22,midY+4);
+      ctx.textAlign='left';
+      y+=rowH;
+    });
+  }
+
+  // divisor
+  ctx.strokeStyle='#E8EBF0';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(pad+22,y+14);ctx.lineTo(W-pad-22,y+14);ctx.stroke();
+
+  // total
+  ctx.textBaseline='alphabetic';
+  ctx.fillStyle='#0F1923';
+  ctx.font='700 15px "Plus Jakarta Sans", sans-serif';
+  ctx.fillText('Total',pad+22,y+40);
+  ctx.fillStyle='#3B6CF4';
+  ctx.font='800 20px Manrope, sans-serif';
+  ctx.textAlign='right';
+  ctx.fillText(fmt(d.total),W-pad-22,y+42);
+  ctx.textAlign='left';
+
+  // rodapé
+  ctx.fillStyle='#9AA5B4';
+  ctx.font='500 10px "Plus Jakarta Sans", sans-serif';
+  ctx.fillText('Gerado pelo Fluxo — Controle Financeiro',pad+22,H-pad-16);
+
+  canvas.toBlob(async blob=>{
+    if(!blob){showToast('Erro ao gerar imagem');return;}
+    const fileName=`cobranca_${(d.nome||'pessoa').replace(/\s+/g,'_')}_${curM+1}-${curY}.png`;
+    const file=new File([blob],fileName,{type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({files:[file],title:'Cobrança',text:`Cobrança — ${d.mesLabel}`});
+        closeCobrancaModal();
+        return;
+      }catch(e){
+        if(e && e.name==='AbortError')return;
+      }
+    }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=fileName;
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),3000);
+    showToast('Imagem salva!');
+    closeCobrancaModal();
+  },'image/png');
 }
 
 // ── GRUPO MODAL ─────────────────────────────────────────────
