@@ -163,9 +163,11 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
 .meta-tipo-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;border-radius:4px;padding:2px 7px;margin-bottom:6px}
 .meta-tipo-teto{background:var(--rbg);color:var(--red)}
 .meta-tipo-econ{background:var(--gbg);color:var(--green)}
+.meta-tipo-invest{background:var(--pbg);color:var(--purple)}
 .meta-badge-pill{display:inline-flex;align-items:center;font-size:11px;font-weight:700;border-radius:50px;padding:4px 12px}
 .meta-badge-pill.tipo-teto{background:var(--rbg);color:var(--red)}
 .meta-badge-pill.tipo-econ{background:var(--gbg);color:var(--green)}
+.meta-badge-pill.tipo-invest{background:var(--pbg);color:var(--purple)}
 .meta-actions{display:flex;gap:6px;margin-top:8px}
 .meta-btn{flex:1;background:none;border:1px solid var(--b2);border-radius:var(--rs);padding:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--t3)}
 .meta-btn.edit{color:var(--blue);border-color:var(--blue)}
@@ -393,24 +395,44 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
 .period-nav button{background:var(--bg3);border:none;width:28px;height:28px;border-radius:50%;font-size:16px;color:var(--t2);cursor:pointer}
 .period-nav .ml{font-size:13px;font-weight:700;color:var(--t);min-width:110px;text-align:center}
 
-/* VERTICAL BAR CHART (busca por período) */
-.vbar-chart{display:flex;align-items:flex-end;gap:5px;height:170px;padding:6px 2px 0;overflow-x:auto}
-.vbar-chart::-webkit-scrollbar{display:none}
-.vbar-col{flex:1;min-width:22px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
-.vbar-val{font-size:8px;font-weight:800;color:var(--t2);margin-bottom:4px;white-space:nowrap;font-family:'Manrope',sans-serif}
-.vbar-bar{width:100%;max-width:22px;border-radius:4px 4px 0 0;transition:height .4s ease;min-height:2px}
-.vbar-label{font-size:8px;color:var(--t3);margin-top:6px;font-weight:600;text-align:center;white-space:nowrap}
-.vbar-col.current .vbar-bar{box-shadow:0 0 0 2px var(--blue) inset}
-.vbar-col.current .vbar-label{color:var(--blue);font-weight:800}
-.insight-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--b)}
-.insight-row:last-child{border-bottom:none}
-
 /* ── V3.1 — METAS: DRAG AND DROP ───────────────────────── */
 .meta-card{position:relative;touch-action:pan-y}
 .meta-card.dragging{box-shadow:var(--shadow-lg);z-index:20;opacity:.92}
 .meta-drag{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:26px;color:var(--t3);cursor:grab;touch-action:none;user-select:none}
 .meta-drag svg{width:9px;height:15px;pointer-events:none}
 .meta-drag:active{cursor:grabbing;color:var(--blue)}
+
+/* ── V3.2 — ANÁLISE ────────────────────────────────────── */
+.an-card{background:var(--bg2);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.an-card h4{font-size:11px;letter-spacing:1.5px;color:var(--t3);text-transform:uppercase;font-weight:700;margin-bottom:10px}
+.an-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b)}
+.an-row:last-child{border-bottom:none}
+.an-cat{font-size:12px;font-weight:600;color:var(--t)}
+.an-sub{font-size:10px;color:var(--t3);font-weight:500;margin-top:1px}
+.an-delta{font-size:13px;font-weight:800;font-family:'Manrope',sans-serif;text-align:right;flex-shrink:0}
+.an-delta.up{color:var(--red)}
+.an-delta.down{color:var(--green)}
+.an-delta.flat{color:var(--t3)}
+.an-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.an-sum-card{background:var(--bg2);border-radius:var(--r);padding:12px 14px;box-shadow:var(--shadow);border:1.5px solid var(--b)}
+.an-sum-label{font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.an-sum-val{font-size:17px;font-weight:800;font-family:'Manrope',sans-serif;letter-spacing:-.4px}
+.an-sum-sub{font-size:10px;color:var(--t3);margin-top:3px;font-weight:500}
+.an-empty-note{font-size:11px;color:var(--t3);text-align:center;padding:10px 0;line-height:1.6}
+.an-budget-row{margin-bottom:12px}
+.an-budget-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.an-budget-name{font-size:12px;font-weight:700;color:var(--t)}
+.an-budget-nums{font-size:11px;color:var(--t3);font-weight:600}
+.an-badge-apply{background:var(--bbg);color:var(--blue);border:none;border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
+.sugg-box{background:var(--bbg);border:1.5px dashed var(--blue);border-radius:var(--r);padding:12px 14px;margin-bottom:12px}
+.sugg-box .slabel{color:var(--blue);margin-bottom:8px}
+.sugg-item{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px}
+.sugg-item span:first-child{color:var(--t2);font-weight:500}
+.sugg-item span:last-child{color:var(--blue);font-weight:700;font-family:'Manrope',sans-serif}
+.sugg-apply-btn{width:100%;background:var(--blue);border:none;border-radius:var(--rs);padding:9px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;margin-top:6px}
+
+/* ── V3.2 — INVESTIMENTOS ──────────────────────────────── */
+.inv-projecao{background:var(--pbg);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:11px;color:var(--purple);font-weight:600;line-height:1.5}
 </style>
 </head>
 <body>
@@ -469,13 +491,6 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
           <div class="legend" id="legend"></div>
         </div>
       </div>
-    </div>
-    <div class="sec" id="projecaoSec" style="display:none;padding-top:14px">
-      <div id="projecaoBox" class="chart-box"></div>
-    </div>
-    <div class="sec" style="padding-top:14px">
-      <div class="slabel">semáforo de metas</div>
-      <div class="chart-box" id="semaforoBox"></div>
     </div>
     <div class="sec" style="padding-top:14px">
       <div class="list-header">
@@ -567,7 +582,12 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
           <span class="setup-label">Mercantil</span>
           <input class="setup-input" type="number" id="wOrcMerc" placeholder="0,00" inputmode="decimal" oninput="saveWeekSetup()">
         </div>
+        <div class="setup-row">
+          <span class="setup-label">Gastos Extras</span>
+          <input class="setup-input" type="number" id="wOrcExtras" placeholder="0,00" inputmode="decimal" oninput="saveWeekSetup()">
+        </div>
       </div>
+      <div class="sugg-box" id="suggBox"></div>
       <div class="budget-result" id="budgetResult"></div>
       <div style="margin-bottom:10px">
         <div class="slabel">orçamento por semana</div>
@@ -591,7 +611,8 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
     <div class="sec">
       <div class="hist-tabs">
         <button class="fbtn active" id="histTabMes" onclick="setHistTab('mes')">Por mês</button>
-        <button class="fbtn" id="histTabPeriodo" onclick="setHistTab('periodo')">Busca por período</button>
+        <button class="fbtn" id="histTabPeriodo" onclick="setHistTab('periodo')">Período</button>
+        <button class="fbtn" id="histTabAnalise" onclick="setHistTab('analise')">Análise</button>
       </div>
       <div id="histMesView">
         <div class="slabel" style="margin-bottom:12px">maiores gastos — todos os meses</div>
@@ -626,17 +647,11 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
             </div>
           </div>
         </div>
-        <div class="frow" id="periodoMetricRow">
-          <button class="fbtn active" onclick="setPeriodoMetric('saldo',this)">Saldo</button>
-          <button class="fbtn" onclick="setPeriodoMetric('entrada',this)">Entradas</button>
-          <button class="fbtn" onclick="setPeriodoMetric('saida',this)">Saídas</button>
-        </div>
-        <div class="slabel" id="periodoChartLabel" style="margin-bottom:8px">saldo por mês · 6 meses atrás → 6 meses à frente</div>
-        <div class="chart-box" style="margin-bottom:16px">
-          <div class="vbar-chart" id="histPeriodoVBarChart"></div>
-        </div>
-        <div class="slabel" style="margin-bottom:10px">insights do mês</div>
-        <div class="chart-box" id="periodoInsights" style="margin-bottom:16px"></div>
+        <div class="slabel" style="margin-bottom:12px">saldo por mês (entradas − saídas) · 6 meses atrás → 6 meses à frente</div>
+        <div id="histPeriodoList"></div>
+      </div>
+      <div id="histAnaliseView" style="display:none">
+        <div id="analiseEl"></div>
       </div>
     </div>
   </div>
@@ -810,9 +825,10 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
     <div class="m-handle"></div>
     <div class="m-title" id="metaModalTitle">Nova Meta</div>
     <!-- tipo -->
-    <div class="type-row" style="margin-bottom:14px">
-      <button class="tbtn" id="mTipoTeto" onclick="setMetaTipo('teto')" style="border-color:var(--red);background:var(--rbg);color:var(--red)">🎯 Teto de gastos</button>
-      <button class="tbtn" id="mTipoEcon" onclick="setMetaTipo('economia')">💰 Meta de economia</button>
+    <div class="type-row" style="margin-bottom:14px;grid-template-columns:1fr 1fr 1fr">
+      <button class="tbtn" id="mTipoTeto" onclick="setMetaTipo('teto')" style="border-color:var(--red);background:var(--rbg);color:var(--red);font-size:11px">🎯 Teto</button>
+      <button class="tbtn" id="mTipoEcon" onclick="setMetaTipo('economia')" style="font-size:11px">💰 Economia</button>
+      <button class="tbtn" id="mTipoInvest" onclick="setMetaTipo('investimento')" style="font-size:11px">📈 Investimento</button>
     </div>
     <div class="field"><label>Nome / objetivo</label><input type="text" id="mNome" placeholder="Ex: Limite Gastos Extras, Lava e Seca..."></div>
     <!-- campos teto -->
@@ -970,7 +986,6 @@ let fSearch='',fCat=[],fCartao=[],fResp=[];
 // busca por período (Histórico)
 let pfCat=[],pfCartao=[],pfResp=[];
 let pRefM=new Date().getMonth(),pRefY=new Date().getFullYear();
-let periodoMetric='saldo';
 
 const fmt=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const fmtD=s=>{if(!s)return'';const p=s.split('-');return`${p[2]}/${p[1]}`};
@@ -1003,7 +1018,7 @@ function render(){
   const bv=document.getElementById('balVal');
   bv.textContent=fmt(bal);bv.className='hval '+(bal>=0?'pos':'neg');
   document.getElementById('balSub').textContent=ent>0?`${Math.round(sai/ent*100)}% comprometido`:'';
-  renderChart(items);renderList(items);renderMetas();renderHist();renderSemana();renderCfg();renderProjecao();renderSemaforo();
+  renderChart(items);renderList(items);renderMetas();renderHist();renderSemana();renderCfg();
 }
 
 // ── CHART ──────────────────────────────────────────────────
@@ -1087,113 +1102,6 @@ function renderList(items){
   }).join('');
 }
 
-// ── ORÇAMENTO LIVRE DO MÊS (compartilhado entre Semana e Projeção) ──
-function calcBudgetLivreMes(m,y){
-  const k=getKey(m,y);
-  const ws=wsetup[k]||{};
-  const sal=ws.salario||0;
-  const inv=ws.invest||0;
-  const res=ws.reserva||0;
-  const meu=ws.mesadaEu||0;
-  const ela=ws.mesadaEla||0;
-  const orcAlim=ws.orcAlim||0;
-  const orcTransp=ws.orcTransp||0;
-  const orcMerc=ws.orcMerc||0;
-  const totalDed=inv+res+meu+ela;
-  const totalOrc=orcAlim+orcTransp+orcMerc;
-  // orçamento livre total do mês = salário − deduções − orçamentos fixos planejados (alim/transp/merc)
-  const budgetTotal=Math.max(0,sal-totalDed-totalOrc);
-  return{sal,totalDed,totalOrc,budgetTotal};
-}
-
-// ── PROJEÇÃO DO MÊS CORRENTE ────────────────────────────────
-function renderProjecao(){
-  const sec=document.getElementById('projecaoSec');
-  const box=document.getElementById('projecaoBox');
-  if(!sec||!box)return;
-  const hoje=new Date();
-  const isMesAtual=curM===hoje.getMonth()&&curY===hoje.getFullYear();
-  if(!isMesAtual){sec.style.display='none';return;}
-  sec.style.display='block';
-  const diaHoje=hoje.getDate();
-  const diasNoMes=new Date(curY,curM+1,0).getDate();
-  const items=getItems();
-  const gastoAteAgora=items.filter(i=>{
-    if(i.tipo!=='saida'||isPessoaGasto(i))return false;
-    if(!i.dataLanc)return false;
-    return new Date(i.dataLanc+'T00:00:00')<=hoje;
-  }).reduce((a,i)=>a+i.valor,0);
-  const mediaDia=diaHoje>0?gastoAteAgora/diaHoje:0;
-  const projecao=mediaDia*diasNoMes;
-  const diasRestantes=Math.max(0,diasNoMes-diaHoje);
-  const {budgetTotal}=calcBudgetLivreMes(curM,curY);
-  const temOrcamento=budgetTotal>0;
-  const cor=temOrcamento?(projecao>budgetTotal?'var(--red)':projecao>budgetTotal*0.85?'var(--amber)':'var(--green)'):'var(--amber)';
-  const diff=budgetTotal-projecao;
-  box.innerHTML=`
-    <div class="slabel" style="margin-bottom:8px">projeção de gastos do mês</div>
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
-      <span style="font-size:11px;color:var(--t3)">Gasto até hoje (dia ${diaHoje}/${diasNoMes})</span>
-      <span style="font-size:13px;font-weight:700;font-family:'Manrope',sans-serif;color:var(--t)">${fmt(gastoAteAgora)}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
-      <span style="font-size:11px;color:var(--t3)">Média diária</span>
-      <span style="font-size:12px;font-weight:600;color:var(--t2)">${fmt(mediaDia)}/dia</span>
-    </div>
-    <div style="height:1px;background:var(--b);margin:8px 0"></div>
-    <div style="display:flex;justify-content:space-between;align-items:baseline">
-      <span style="font-size:13px;font-weight:700;color:var(--t)">Projeção total do mês</span>
-      <span style="font-size:16px;font-weight:800;font-family:'Manrope',sans-serif;color:${cor}">${fmt(projecao)}</span>
-    </div>
-    ${temOrcamento?`
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:6px">
-      <span style="font-size:11px;color:var(--t3)">Orçamento livre do mês</span>
-      <span style="font-size:12px;font-weight:600;color:var(--t2)">${fmt(budgetTotal)}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:2px">
-      <span style="font-size:11px;color:var(--t3)">${diff>=0?'Sobra estimada':'Excedente estimado'}</span>
-      <span style="font-size:12px;font-weight:700;color:${diff>=0?'var(--green)':'var(--red)'}">${fmt(Math.abs(diff))}</span>
-    </div>`:`<div style="font-size:10px;color:var(--t3);margin-top:6px">Configure o orçamento na aba Semana para comparar com o limite livre do mês.</div>`}
-    <div style="font-size:10px;color:var(--t3);margin-top:6px">Baseado no ritmo atual de gastos · faltam ${diasRestantes} dias no mês</div>`;
-}
-
-// ── SEMÁFORO DE METAS (teto de gastos ativos no mês) ────────
-function renderSemaforo(){
-  const box=document.getElementById('semaforoBox');
-  if(!box)return;
-  const curKey=curY*100+curM;
-  const tetos=metas.filter(m=>{
-    if(m.tipo!=='teto')return false;
-    const iniKey=m.iniY*100+m.iniM,fimKey=m.fimY*100+m.fimM;
-    return curKey>=iniKey&&curKey<=fimKey;
-  });
-  if(!tetos.length){box.innerHTML='<div class="empty" style="padding:10px 0">Nenhuma meta de teto ativa neste mês</div>';return;}
-  box.innerHTML=tetos.map(m=>{
-    const iniKey=m.iniY*100+m.iniM,fimKey=m.fimY*100+m.fimM;
-    const gasto=data.filter(i=>{
-      if(i.tipo!=='saida'||i.cat!==m.cat)return false;
-      const k2=i.fatY*100+i.fatM;
-      return k2>=iniKey&&k2<=fimKey;
-    }).reduce((a,i)=>a+i.valor,0);
-    const pct=m.lim>0?gasto/m.lim*100:0;
-    const cor=pct>=100?'var(--red)':pct>=80?'var(--amber)':'var(--green)';
-    const emoji=pct>=100?'🔴':pct>=80?'🟡':'🟢';
-    return `<div class="insight-row">
-      <div style="display:flex;align-items:center;gap:8px;min-width:0">
-        <span style="font-size:14px;flex-shrink:0">${emoji}</span>
-        <div style="min-width:0">
-          <div style="font-size:12px;font-weight:600;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px">${m.nome}</div>
-          <div style="font-size:10px;color:var(--t3)">${m.cat}</div>
-        </div>
-      </div>
-      <div style="text-align:right;flex-shrink:0">
-        <div style="font-size:12px;font-weight:700;font-family:'Manrope',sans-serif;color:${cor}">${Math.round(pct)}%</div>
-        <div style="font-size:9px;color:var(--t3)">${fmt(gasto)} / ${fmt(m.lim)}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
 // ── SEMANA ─────────────────────────────────────────────────
 function saveWeekSetup(){
   const k=getKey(curM,curY);
@@ -1206,6 +1114,7 @@ function saveWeekSetup(){
   wsetup[k].orcAlim=parseFloat(document.getElementById('wOrcAlim').value)||0;
   wsetup[k].orcTransp=parseFloat(document.getElementById('wOrcTransp').value)||0;
   wsetup[k].orcMerc=parseFloat(document.getElementById('wOrcMerc').value)||0;
+  wsetup[k].orcExtras=parseFloat(document.getElementById('wOrcExtras').value)||0;
   localStorage.setItem('fluxo_wsetup',JSON.stringify(wsetup));
   sbSaveWsetup(k,wsetup[k]);
   renderSemana();
@@ -1214,7 +1123,7 @@ function saveWeekSetup(){
 function renderSemana(){
   const k=getKey(curM,curY);
   const ws=wsetup[k]||{};
-  const fields={wSalario:'salario',wInvest:'invest',wReserva:'reserva',wMesadaEu:'mesadaEu',wMesadaEla:'mesadaEla',wOrcAlim:'orcAlim',wOrcTransp:'orcTransp',wOrcMerc:'orcMerc'};
+  const fields={wSalario:'salario',wInvest:'invest',wReserva:'reserva',wMesadaEu:'mesadaEu',wMesadaEla:'mesadaEla',wOrcAlim:'orcAlim',wOrcTransp:'orcTransp',wOrcMerc:'orcMerc',wOrcExtras:'orcExtras'};
   Object.entries(fields).forEach(([id,key])=>{
     const el=document.getElementById(id);
     if(el&&!el.matches(':focus'))el.value=ws[key]||'';
@@ -1228,11 +1137,13 @@ function renderSemana(){
   const orcAlim=ws.orcAlim||0;
   const orcTransp=ws.orcTransp||0;
   const orcMerc=ws.orcMerc||0;
+  const orcExtras=ws.orcExtras||0;
 
   const CATS_ALIM=['Alimentação - Necessidade','Alimentação - Saídas'];
   const CATS_TRANSP=['Carro - Transporte'];
   const CATS_MERC=['Mercantil'];
-  const CATS_FIXOS=[...CATS_ALIM,...CATS_TRANSP,...CATS_MERC];
+  const CATS_EXTRAS=['Gastos Extras'];
+  const CATS_FIXOS=[...CATS_ALIM,...CATS_TRANSP,...CATS_MERC,...CATS_EXTRAS];
 
   const items=getItems();
   const saidas=items.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i));
@@ -1246,13 +1157,12 @@ function renderSemana(){
   todosComp.forEach(i=>{compByCat[i.cat]=(compByCat[i.cat]||0)+i.valor;});
   const compCats=Object.entries(compByCat).sort((a,b)=>b[1]-a[1]);
 
-  // orçamento planejado para gastos FUTUROS de alim/transp/merc
-  const totalOrc=orcAlim+orcTransp+orcMerc;
+  // orçamento planejado para gastos FUTUROS de alim/transp/merc/extras
+  const totalOrc=orcAlim+orcTransp+orcMerc+orcExtras;
 
   // orçamento livre = salário − deduções − comprometidos − orçamento planejado fixos
   const totalDed=inv+res+meu+ela;
-  const {budgetTotal}=calcBudgetLivreMes(curM,curY);
-  const livre=Math.max(0,budgetTotal-totalComp);
+  const livre=Math.max(0,sal-totalDed-totalComp-totalOrc);
   const porSemana=livre/4;
 
   // resultado
@@ -1279,6 +1189,7 @@ function renderSemana(){
     <div class="br-row"><span class="br-label" style="color:var(--purple)">− Orç. Alimentação (futuro)</span><span class="br-val" style="color:var(--purple)">${fmt(orcAlim)}</span></div>
     <div class="br-row"><span class="br-label" style="color:var(--purple)">− Orç. Transporte (futuro)</span><span class="br-val" style="color:var(--purple)">${fmt(orcTransp)}</span></div>
     <div class="br-row"><span class="br-label" style="color:var(--purple)">− Orç. Mercantil (futuro)</span><span class="br-val" style="color:var(--purple)">${fmt(orcMerc)}</span></div>
+    <div class="br-row"><span class="br-label" style="color:var(--purple)">− Orç. Gastos Extras (futuro)</span><span class="br-val" style="color:var(--purple)">${fmt(orcExtras)}</span></div>
     <div class="br-divider"></div>
     <div class="br-row"><span class="br-total-label">Orçamento livre</span><span class="br-total-val">${fmt(livre)}</span></div>
     <div class="br-row" style="margin-top:2px"><span class="br-label" style="font-size:10px">÷ 4 semanas</span><span class="br-val" style="color:var(--blue);font-weight:600">${fmt(porSemana)} / semana</span></div>`;
@@ -1321,10 +1232,12 @@ function renderSemana(){
   const gastoAlim=saidasDoMes.filter(i=>CATS_ALIM.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
   const gastoTransp=saidasDoMes.filter(i=>CATS_TRANSP.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
   const gastoMerc=saidasDoMes.filter(i=>CATS_MERC.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
+  const gastoExtras=saidasDoMes.filter(i=>CATS_EXTRAS.includes(i.cat)).reduce((a,i)=>a+i.valor,0);
   const fixos=[
     {label:'Alimentação',gasto:gastoAlim,orc:orcAlim,cor:'#a78bfa'},
     {label:'Transporte',gasto:gastoTransp,orc:orcTransp,cor:'#4d8ef7'},
     {label:'Mercantil',gasto:gastoMerc,orc:orcMerc,cor:'#22c97a'},
+    {label:'Gastos Extras',gasto:gastoExtras,orc:orcExtras,cor:'#f472b6'},
   ];
   document.getElementById('excBars').innerHTML=fixos.map(f=>{
     const pct=f.orc>0?Math.min(f.gasto/f.orc*100,100):0;
@@ -1346,8 +1259,59 @@ function renderSemana(){
     </div>`;
   }).join('');
   document.getElementById('weekNote').textContent='';
+  renderSuggBox();
 }
 
+// ── SUGESTÃO DE ORÇAMENTO (baseada no histórico real) ──────
+// calcula, para cada categoria orçável, a mediana dos totais mensais
+// dos últimos até 6 meses de fatura JÁ FECHADOS (exclui o mês corrente,
+// que normalmente está incompleto) com lançamentos.
+function calcSugestaoOrcamento(){
+  const CATS_MAP={orcAlim:['Alimentação - Necessidade','Alimentação - Saídas'],orcTransp:['Carro - Transporte'],orcMerc:['Mercantil'],orcExtras:['Gastos Extras']};
+  const curKey=curY*100+curM;
+  // meses distintos com lançamentos de saída pessoal, exceto o mês corrente
+  const mesesSet=new Set();
+  data.forEach(i=>{
+    if(i.tipo!=='saida'||isPessoaGasto(i))return;
+    const k=i.fatY*100+i.fatM;
+    if(k>=curKey)return; // ignora mês corrente e futuros (incompletos)
+    mesesSet.add(`${i.fatY}-${i.fatM}`);
+  });
+  const meses=[...mesesSet].map(k=>{const p=k.split('-');return{y:parseInt(p[0]),m:parseInt(p[1]),key:parseInt(p[0])*100+parseInt(p[1])};})
+    .sort((a,b)=>b.key-a.key).slice(0,6);
+  if(!meses.length)return null;
+  const out={};
+  Object.entries(CATS_MAP).forEach(([field,cats])=>{
+    const totals=meses.map(({m,y})=>data.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i)&&i.fatM===m&&i.fatY===y&&cats.includes(i.cat)).reduce((a,i)=>a+i.valor,0));
+    const sorted=[...totals].sort((a,b)=>a-b);
+    const mid=Math.floor(sorted.length/2);
+    const mediana=sorted.length%2?sorted[mid]:(sorted[mid-1]+sorted[mid])/2;
+    out[field]=Math.round(mediana*1.15); // +15% de margem de segurança
+  });
+  out._meses=meses.length;
+  return out;
+}
+function renderSuggBox(){
+  const box=document.getElementById('suggBox');
+  if(!box)return;
+  const sugg=calcSugestaoOrcamento();
+  if(!sugg){box.style.display='none';return;}
+  box.style.display='block';
+  const LABELS={orcAlim:'Alimentação',orcTransp:'Transporte',orcMerc:'Mercantil',orcExtras:'Gastos Extras'};
+  box.innerHTML=`<div class="slabel">💡 sugestão baseada nos últimos ${sugg._meses} meses (mediana + 15%)</div>
+    ${Object.entries(LABELS).map(([f,l])=>`<div class="sugg-item"><span>${l}</span><span>${fmt(sugg[f])}</span></div>`).join('')}
+    <button class="sugg-apply-btn" onclick="aplicarSugestaoOrcamento()">Usar estes valores</button>`;
+}
+function aplicarSugestaoOrcamento(){
+  const sugg=calcSugestaoOrcamento();
+  if(!sugg){showToast('Sem histórico suficiente ainda');return;}
+  document.getElementById('wOrcAlim').value=sugg.orcAlim;
+  document.getElementById('wOrcTransp').value=sugg.orcTransp;
+  document.getElementById('wOrcMerc').value=sugg.orcMerc;
+  document.getElementById('wOrcExtras').value=sugg.orcExtras;
+  saveWeekSetup();
+  showToast('Orçamento sugerido aplicado!');
+}
 
 // ── HISTÓRICO ──────────────────────────────────────────────
 function renderHist(){
@@ -1402,13 +1366,16 @@ function toggleHist(k){
 
 // ── HISTÓRICO: BUSCA POR PERÍODO (-6 / +6 meses) ──────────
 function setHistTab(tab){
-  const bMes=document.getElementById('histTabMes'),bPer=document.getElementById('histTabPeriodo');
+  const bMes=document.getElementById('histTabMes'),bPer=document.getElementById('histTabPeriodo'),bAn=document.getElementById('histTabAnalise');
   if(bMes)bMes.classList.toggle('active',tab==='mes');
   if(bPer)bPer.classList.toggle('active',tab==='periodo');
-  const vMes=document.getElementById('histMesView'),vPer=document.getElementById('histPeriodoView');
+  if(bAn)bAn.classList.toggle('active',tab==='analise');
+  const vMes=document.getElementById('histMesView'),vPer=document.getElementById('histPeriodoView'),vAn=document.getElementById('histAnaliseView');
   if(vMes)vMes.style.display=tab==='mes'?'block':'none';
   if(vPer)vPer.style.display=tab==='periodo'?'block':'none';
+  if(vAn)vAn.style.display=tab==='analise'?'block':'none';
   if(tab==='periodo'){renderPeriodoFilters();renderHistPeriodo();}
+  if(tab==='analise'){renderAnalise();}
 }
 function chMPeriodo(d){
   pRefM+=d;
@@ -1443,25 +1410,6 @@ function getFilteredPeriodoItems(m,y){
     return true;
   });
 }
-function setPeriodoMetric(metric,btn){
-  periodoMetric=metric;
-  document.querySelectorAll('#periodoMetricRow .fbtn').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  const labelEl=document.getElementById('periodoChartLabel');
-  if(labelEl){
-    const txt=metric==='entrada'?'entradas por mês':metric==='saida'?'saídas por mês':'saldo por mês (entradas − saídas)';
-    labelEl.textContent=`${txt} · 6 meses atrás → 6 meses à frente`;
-  }
-  renderHistPeriodo();
-}
-
-function fmtShort(v){
-  const abs=Math.abs(v);
-  const sign=v<0?'-':'';
-  if(abs>=1000)return sign+(abs/1000).toFixed(abs>=10000?0:1).replace('.0','')+'k';
-  return sign+Math.round(abs).toString();
-}
-
 function renderHistPeriodo(){
   const mlEl=document.getElementById('mlHistPeriodo');
   if(mlEl)mlEl.textContent=mStr(pRefM,pRefY);
@@ -1472,91 +1420,117 @@ function renderHistPeriodo(){
     while(mo>11){mo-=12;yr++;}
     months.push({m:mo,y:yr});
   }
+  const el=document.getElementById('histPeriodoList');
+  if(!el)return;
   const rows=months.map(({m,y})=>{
     const items=getFilteredPeriodoItems(m,y);
     const ent=items.filter(i=>i.tipo==='entrada').reduce((a,i)=>a+i.valor,0);
     const sai=items.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i)).reduce((a,i)=>a+i.valor,0);
-    return{m,y,ent,sai,saldo:ent-sai,isCur:m===pRefM&&y===pRefY};
+    return{m,y,saldo:ent-sai,isCur:m===pRefM&&y===pRefY};
   });
-  renderVBarChart(rows);
-  renderPeriodoInsights();
-}
-
-function renderVBarChart(rows){
-  const el=document.getElementById('histPeriodoVBarChart');
-  if(!el)return;
-  const vals=rows.map(r=>periodoMetric==='saldo'?r.saldo:periodoMetric==='entrada'?r.ent:r.sai);
-  const maxAbs=Math.max(1,...vals.map(v=>Math.abs(v)));
-  const colorFor=v=>{
-    if(periodoMetric==='entrada')return 'var(--green)';
-    if(periodoMetric==='saida')return 'var(--red)';
-    return v>=0?'var(--green)':'var(--red)';
-  };
-  el.innerHTML=rows.map((r,i)=>{
-    const v=vals[i];
-    const pct=v===0?2:Math.max(4,Math.round(Math.abs(v)/maxAbs*100));
-    const cor=colorFor(v);
-    return `<div class="vbar-col${r.isCur?' current':''}">
-      <span class="vbar-val" style="color:${cor}">${v!==0?fmtShort(v):''}</span>
-      <div class="vbar-bar" style="height:${pct}%;background:${cor}"></div>
-      <span class="vbar-label">${MS[r.m].slice(0,3)}/${String(r.y).slice(2)}</span>
+  const maxAbs=Math.max(1,...rows.map(r=>Math.abs(r.saldo)));
+  el.innerHTML=`<div class="chart-box"><div class="bar-chart period-bar-chart">${rows.map(r=>{
+    const pct=Math.round(Math.abs(r.saldo)/maxAbs*100);
+    const cor=r.saldo>=0?'var(--green)':'var(--red)';
+    return`<div class="bar-row${r.isCur?' bar-row-current':''}">
+      <span class="bar-name">${MS[r.m].slice(0,3)}/${String(r.y).slice(2)}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${cor}"></div></div>
+      <span class="bar-val" style="color:${cor}">${fmt(r.saldo)}</span>
     </div>`;
-  }).join('');
+  }).join('')}</div></div>`;
 }
 
-function renderPeriodoInsights(){
-  const el=document.getElementById('periodoInsights');
+// ── ANÁLISE (comparativo mês vs mês anterior + tendência) ──
+function renderAnalise(){
+  const el=document.getElementById('analiseEl');
   if(!el)return;
-  const itemsAtual=getFilteredPeriodoItems(pRefM,pRefY).filter(i=>i.tipo==='saida'&&!isPessoaGasto(i));
-  let prevM=pRefM-1,prevY=pRefY;if(prevM<0){prevM=11;prevY--;}
-  const itemsAnterior=getFilteredPeriodoItems(prevM,prevY).filter(i=>i.tipo==='saida'&&!isPessoaGasto(i));
+  let refM=curM,refY=curY;
+  let prevM=refM-1,prevY=refY; if(prevM<0){prevM=11;prevY--;}
 
-  const top5=[...itemsAtual].sort((a,b)=>b.valor-a.valor).slice(0,5);
+  const curItems=data.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i)&&i.fatM===refM&&i.fatY===refY);
+  const prevItems=data.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i)&&i.fatM===prevM&&i.fatY===prevY);
+  const curTotal=curItems.reduce((a,i)=>a+i.valor,0);
+  const prevTotal=prevItems.reduce((a,i)=>a+i.valor,0);
+  const diffTotal=curTotal-prevTotal;
+  const pctTotal=prevTotal>0?(diffTotal/prevTotal*100):0;
 
-  const byCatAtual={},byCatAnt={};
-  itemsAtual.forEach(i=>{byCatAtual[i.cat]=(byCatAtual[i.cat]||0)+i.valor;});
-  itemsAnterior.forEach(i=>{byCatAnt[i.cat]=(byCatAnt[i.cat]||0)+i.valor;});
-  let maiorAumentoCat=null,maiorAumentoVal=0;
-  Object.keys(byCatAtual).forEach(cat=>{
-    const diff=byCatAtual[cat]-(byCatAnt[cat]||0);
-    if(diff>maiorAumentoVal){maiorAumentoVal=diff;maiorAumentoCat=cat;}
+  if(!curItems.length&&!prevItems.length){
+    el.innerHTML=`<div class="an-empty-note">Ainda não há dados suficientes em ${mStr(refM,refY)} ou ${mStr(prevM,prevY)} para comparar.</div>`;
+    return;
+  }
+
+  // por categoria
+  const byCat=(items)=>{const o={};items.forEach(i=>{o[i.cat]=(o[i.cat]||0)+i.valor;});return o;};
+  const curCat=byCat(curItems),prevCat=byCat(prevItems);
+  const allCats=[...new Set([...Object.keys(curCat),...Object.keys(prevCat)])];
+  const deltas=allCats.map(cat=>{
+    const c=curCat[cat]||0,p=prevCat[cat]||0;
+    return {cat,c,p,d:c-p,pct:p>0?((c-p)/p*100):(c>0?100:0)};
+  }).filter(x=>Math.abs(x.d)>0.5).sort((a,b)=>b.d-a.d);
+  const altas=deltas.filter(x=>x.d>0).slice(0,5);
+  const quedas=deltas.filter(x=>x.d<0).sort((a,b)=>a.d-b.d).slice(0,5);
+
+  // tendência 6 meses — categorias orçáveis
+  const CATS_TREND={'Alimentação':['Alimentação - Necessidade','Alimentação - Saídas'],'Transporte':['Carro - Transporte'],'Mercantil':['Mercantil'],'Gastos Extras':['Gastos Extras']};
+  const mesesTrend=[];
+  for(let off=5;off>=0;off--){let mo=refM-off,yy=refY;while(mo<0){mo+=12;yy--;}mesesTrend.push({m:mo,y:yy});}
+  const trendRows=Object.entries(CATS_TREND).map(([label,cats],idx)=>{
+    const vals=mesesTrend.map(({m,y})=>data.filter(i=>i.tipo==='saida'&&!isPessoaGasto(i)&&i.fatM===m&&i.fatY===y&&cats.includes(i.cat)).reduce((a,i)=>a+i.valor,0));
+    return {label,vals,cor:PAL[idx%PAL.length]};
   });
-  let maiorReducaoCat=null,maiorReducaoVal=0;
-  Object.keys(byCatAnt).forEach(cat=>{
-    const diff=(byCatAtual[cat]||0)-byCatAnt[cat];
-    if(diff<maiorReducaoVal){maiorReducaoVal=diff;maiorReducaoCat=cat;}
-  });
+  const trendMax=Math.max(1,...trendRows.flatMap(r=>r.vals));
 
-  const totalAtual=itemsAtual.reduce((a,i)=>a+i.valor,0);
-  const totalAnterior=itemsAnterior.reduce((a,i)=>a+i.valor,0);
-  const varTotal=totalAnterior>0?((totalAtual-totalAnterior)/totalAnterior*100):null;
+  const incompleto=(refY*100+refM)>=(new Date().getFullYear()*100+new Date().getMonth())?'<div class="an-empty-note">⚠️ O mês atual pode ainda estar incompleto — a comparação tende a favorecer o mês corrente.</div>':'';
 
   el.innerHTML=`
-    <div style="font-size:10px;font-weight:700;color:var(--t3);letter-spacing:1px;margin-bottom:8px">TOP 5 GASTOS · ${mStr(pRefM,pRefY)}</div>
-    ${top5.length?top5.map((i,idx)=>`
-      <div class="insight-row">
-        <div style="display:flex;align-items:center;gap:8px;min-width:0">
-          <span style="font-size:11px;font-weight:800;color:var(--t3);width:14px;flex-shrink:0">${idx+1}</span>
-          <div style="min-width:0">
-            <div style="font-size:12px;font-weight:600;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px">${i.desc}</div>
-            <div style="font-size:10px;color:var(--t3)">${i.cat}</div>
-          </div>
-        </div>
-        <div style="font-size:12px;font-weight:700;color:var(--red);font-family:'Manrope',sans-serif;flex-shrink:0">${fmt(i.valor)}</div>
-      </div>`).join(''):'<div style="font-size:11px;color:var(--t3);padding:6px 0">Nenhum gasto no período filtrado</div>'}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
-      <div style="background:var(--rbg);border-radius:var(--rs);padding:10px 12px">
-        <div style="font-size:9px;font-weight:700;color:var(--red);letter-spacing:.5px;margin-bottom:4px">MAIOR AUMENTO vs mês ant.</div>
-        ${maiorAumentoCat?`<div style="font-size:12px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${maiorAumentoCat}</div><div style="font-size:11px;color:var(--red);font-weight:700">+${fmt(maiorAumentoVal)}</div>`:'<div style="font-size:11px;color:var(--t3)">Sem dados</div>'}
+    <div class="an-summary">
+      <div class="an-sum-card">
+        <div class="an-sum-label">${mStr(refM,refY)}</div>
+        <div class="an-sum-val">${fmt(curTotal)}</div>
+        <div class="an-sum-sub">saídas pessoais</div>
       </div>
-      <div style="background:var(--gbg);border-radius:var(--rs);padding:10px 12px">
-        <div style="font-size:9px;font-weight:700;color:var(--green);letter-spacing:.5px;margin-bottom:4px">MAIOR REDUÇÃO vs mês ant.</div>
-        ${maiorReducaoCat?`<div style="font-size:12px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${maiorReducaoCat}</div><div style="font-size:11px;color:var(--green);font-weight:700">${fmt(maiorReducaoVal)}</div>`:'<div style="font-size:11px;color:var(--t3)">Sem dados</div>'}
+      <div class="an-sum-card">
+        <div class="an-sum-label">vs ${mStr(prevM,prevY)}</div>
+        <div class="an-sum-val" style="color:${diffTotal<=0?'var(--green)':'var(--red)'}">${diffTotal<=0?'':'+'}${fmt(diffTotal)}</div>
+        <div class="an-sum-sub">${pctTotal<=0?'':'+'}${pctTotal.toFixed(1)}% em relação ao mês anterior</div>
       </div>
     </div>
-    <div style="margin-top:10px;text-align:center;font-size:11px;color:var(--t3)">
-      Total de saídas no mês: <strong style="color:var(--t)">${fmt(totalAtual)}</strong>${varTotal!==null?` · <span style="color:${varTotal>=0?'var(--red)':'var(--green)'};font-weight:700">${varTotal>=0?'+':''}${varTotal.toFixed(0)}% vs mês anterior</span>`:''}
+    ${incompleto}
+    <div class="an-card">
+      <h4>📉 O que mais caiu (melhorou)</h4>
+      ${quedas.length?quedas.map(x=>`<div class="an-row"><div><div class="an-cat">${x.cat}</div><div class="an-sub">${fmt(x.p)} → ${fmt(x.c)}</div></div><div class="an-delta down">${fmt(x.d)}</div></div>`).join(''):'<div class="an-empty-note">Nenhuma categoria caiu de forma relevante</div>'}
+    </div>
+    <div class="an-card">
+      <h4>📈 O que mais subiu (piorou)</h4>
+      ${altas.length?altas.map(x=>`<div class="an-row"><div><div class="an-cat">${x.cat}</div><div class="an-sub">${fmt(x.p)} → ${fmt(x.c)}</div></div><div class="an-delta up">+${fmt(x.d)}</div></div>`).join(''):'<div class="an-empty-note">Nenhuma categoria subiu de forma relevante</div>'}
+    </div>
+    <div class="an-card">
+      <h4>tendência — últimos 6 meses (categorias orçáveis)</h4>
+      ${trendRows.map(r=>`
+        <div class="an-budget-row">
+          <div class="an-budget-head"><span class="an-budget-name">${r.label}</span><span class="an-budget-nums">${r.vals.map(v=>fmt(v).replace('R$\u00a0','R$')).join(' · ')}</span></div>
+          <div style="display:flex;gap:3px;align-items:flex-end;height:36px">
+            ${r.vals.map(v=>`<div style="flex:1;background:${r.cor};border-radius:3px 3px 0 0;height:${Math.max(4,Math.round(v/trendMax*36))}px;opacity:.85"></div>`).join('')}
+          </div>
+        </div>`).join('')}
+      <div class="an-sub" style="text-align:center;margin-top:4px">${mesesTrend.map(({m})=>MS[m].slice(0,3)).join(' · ')}</div>
+    </div>
+    <div class="an-card">
+      <h4>💡 orçamento sugerido (mediana dos últimos meses fechados + 15%)</h4>
+      <div id="analiseSugg"></div>
+      <div class="an-sub" style="margin-top:6px">Você pode aplicar esses valores direto na aba <strong>Semana</strong>.</div>
     </div>`;
+
+  const sugg=calcSugestaoOrcamento();
+  const suggEl=document.getElementById('analiseSugg');
+  if(suggEl){
+    if(sugg){
+      const LABELS={orcAlim:'Alimentação',orcTransp:'Transporte',orcMerc:'Mercantil',orcExtras:'Gastos Extras'};
+      suggEl.innerHTML=Object.entries(LABELS).map(([f,l])=>`<div class="an-row"><span class="an-cat">${l}</span><span class="an-delta flat">${fmt(sugg[f])}</span></div>`).join('');
+    } else {
+      suggEl.innerHTML='<div class="an-empty-note">Ainda não há meses fechados suficientes</div>';
+    }
+  }
 }
 
 // ── METAS ──────────────────────────────────────────────────
@@ -1610,7 +1584,8 @@ function renderMetas(){
         </div>
       </div>`;
     } else {
-      // economia: acumulado vem dos aportes manuais registrados
+      // economia / investimento: acumulado vem dos aportes manuais registrados
+      const isInvest=m.tipo==='investimento';
       const mesesNoPeriodo=[];
       let y=iniY,mo=iniM;
       while(y*100+mo<=fimKey){mesesNoPeriodo.push({m:mo,y});mo++;if(mo>11){mo=0;y++;}}
@@ -1621,9 +1596,16 @@ function renderMetas(){
       const aportesDA=aportes.filter(a=>a.metaId===m.id);
       const acumulado=aportesDA.reduce((s,a)=>s+a.valor,0);
       const pct=totalObj>0?Math.min(acumulado/totalObj*100,100):0;
-      const cor=m.cor||'var(--blue)';
-      const aportesHtml=aportesDA.length?`<div style="margin-top:8px;background:var(--gbg);border-radius:8px;padding:8px 10px">
-        <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:1px;margin-bottom:6px">APORTES REGISTRADOS</div>
+      const cor=m.cor||(isInvest?'var(--purple)':'var(--blue)');
+      // projeção (só p/ investimento): meses restantes até fim × aporte planejado
+      let projecaoHtml='';
+      if(isInvest){
+        const mesesRestantes=Math.max(0,fimKey-curKey);
+        const projecao=acumulado+porMes*mesesRestantes;
+        projecaoHtml=`<div class="inv-projecao">📊 Se manter ${fmt(porMes)}/mês, projeção até ${mStr(fimM,fimY)}: <strong>${fmt(projecao)}</strong>${mesesRestantes>0?` (${mesesRestantes} ${mesesRestantes===1?'mês restante':'meses restantes'})`:' (período encerrado)'}</div>`;
+      }
+      const aportesHtml=aportesDA.length?`<div style="margin-top:8px;background:${isInvest?'var(--pbg)':'var(--gbg)'};border-radius:8px;padding:8px 10px">
+        <div style="font-size:10px;font-weight:700;color:${isInvest?'var(--purple)':'var(--green)'};letter-spacing:1px;margin-bottom:6px">APORTES REGISTRADOS</div>
         ${aportesDA.sort((a,b)=>new Date(b.data)-new Date(a.data)).map(a=>`
           <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.05)">
             <div>
@@ -1631,7 +1613,7 @@ function renderMetas(){
               <span style="font-size:10px;color:var(--t3);margin-left:6px">${fmtD(a.data)}</span>
             </div>
             <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:12px;font-weight:700;color:var(--green);font-family:'Manrope',sans-serif">+${fmt(a.valor)}</span>
+              <span style="font-size:12px;font-weight:700;color:${isInvest?'var(--purple)':'var(--green)'};font-family:'Manrope',sans-serif">+${fmt(a.valor)}</span>
               <button onclick="deletarAporte('${a.id}')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px">🗑</button>
             </div>
           </div>`).join('')}
@@ -1640,7 +1622,7 @@ function renderMetas(){
         <div class="meta-drag" data-meta-id="${m.id}">${ICO_GRIP}</div>
         <div class="meta-content">
           <div class="meta-top-row">
-            <span class="meta-badge-pill tipo-econ">Meta de economia</span>
+            <span class="meta-badge-pill ${isInvest?'tipo-invest':'tipo-econ'}">${isInvest?'Investimento':'Meta de economia'}</span>
             <div class="meta-icon-actions">
               <button class="micon micon-add" onclick="openAporteModal('${m.id}','${m.nome}')" title="Registrar aporte">${ICO_PLUS}</button>
               <button class="micon micon-edit" onclick="openMetaModal('${m.id}')" title="Editar">${ICO_PENCIL}</button>
@@ -1654,6 +1636,7 @@ function renderMetas(){
           </div>
           <div class="meta-track"><div class="meta-fill" style="width:${pct}%;background:${cor}"></div></div>
           <div class="meta-period-row">${periodo} · ${totalMeses} ${totalMeses===1?'mês':'meses'}${!isAtiva?` · ${curKey<iniKey?'Ainda não iniciada':(pct>=100?'🎉 Objetivo alcançado!':'Encerrada')}`:''}</div>
+          ${projecaoHtml}
           ${aportesDA.length?`<button class="meta-expand-toggle" onclick="toggleMetaExpand('${m.id}')" id="metaExpBtn-${m.id}">${ICO_CHEV}<span>${aportesDA.length} aporte${aportesDA.length!==1?'s':''} · meta/mês ${fmt(porMes)}</span></button>
           <div class="meta-expand" id="metaExp-${m.id}">${aportesHtml}</div>`:''}
         </div>
@@ -2004,17 +1987,18 @@ let curMetaTipo='teto';
 
 function setMetaTipo(tipo){
   curMetaTipo=tipo;
-  document.getElementById('mTipoTeto').className='tbtn'+(tipo==='teto'?' active-s':'');
-  document.getElementById('mTipoEcon').className='tbtn'+(tipo==='economia'?' ae':'');
-  if(tipo==='teto'){
-    document.getElementById('mTipoTeto').style.cssText='border-color:var(--red);background:var(--rbg);color:var(--red)';
-    document.getElementById('mTipoEcon').style.cssText='';
-  } else {
-    document.getElementById('mTipoEcon').style.cssText='border-color:var(--green);background:var(--gbg);color:var(--green)';
-    document.getElementById('mTipoTeto').style.cssText='';
-  }
+  const base='font-size:11px';
+  document.getElementById('mTipoTeto').style.cssText=tipo==='teto'?`border-color:var(--red);background:var(--rbg);color:var(--red);${base}`:base;
+  document.getElementById('mTipoEcon').style.cssText=tipo==='economia'?`border-color:var(--green);background:var(--gbg);color:var(--green);${base}`:base;
+  document.getElementById('mTipoInvest').style.cssText=tipo==='investimento'?`border-color:var(--purple);background:var(--pbg);color:var(--purple);${base}`:base;
   document.getElementById('mCamposTeto').style.display=tipo==='teto'?'block':'none';
-  document.getElementById('mCamposEcon').style.display=tipo==='economia'?'block':'none';
+  document.getElementById('mCamposEcon').style.display=(tipo==='economia'||tipo==='investimento')?'block':'none';
+  const l1=document.querySelector('#mCamposEcon .fr2 .field:nth-child(1) label');
+  const l2=document.querySelector('#mCamposEcon .fr2 .field:nth-child(2) label');
+  if(l1&&l2){
+    if(tipo==='investimento'){l1.textContent='Objetivo total (opcional)';l2.textContent='Aporte planejado / mês';}
+    else{l1.textContent='Total do objetivo (R$)';l2.textContent='Por mês (R$)';}
+  }
 }
 
 function openMetaModal(editId=null){
@@ -2070,7 +2054,7 @@ function salvarMeta(){
     const totalObj=parseFloat(document.getElementById('mTotal').value);
     const porMes=parseFloat(document.getElementById('mPorMes').value);
     if(!totalObj&&!porMes){showToast('Preencha o valor total ou por mês');return;}
-    meta={id:editId||Date.now().toString(),tipo:'economia',nome,totalObj:totalObj||0,porMes:porMes||0,cor:curMetaCor,iniM,iniY,fimM,fimY};
+    meta={id:editId||Date.now().toString(),tipo:curMetaTipo,nome,totalObj:totalObj||0,porMes:porMes||0,cor:curMetaCor,iniM,iniY,fimM,fimY};
   }
   if(editId){
     const old=metas.find(m=>m.id===editId);
