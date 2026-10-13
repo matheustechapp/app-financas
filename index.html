@@ -908,7 +908,10 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
       <div class="field"><label>CDB</label><input type="number" id="pCdb" placeholder="0,00" inputmode="decimal"></div>
       <div class="field"><label>LCI / LCA</label><input type="number" id="pLci" placeholder="0,00" inputmode="decimal"></div>
     </div>
-    <div class="field"><label>Tesouro Direto</label><input type="number" id="pTesouro" placeholder="0,00" inputmode="decimal"></div>
+    <div class="fr2">
+      <div class="field"><label>Tesouro Direto</label><input type="number" id="pTesouro" placeholder="0,00" inputmode="decimal"></div>
+      <div class="field"><label>Outras RF</label><input type="number" id="pOutrasRf" placeholder="Nubank, Mercado Pago..." inputmode="decimal"></div>
+    </div>
     <div style="font-size:10px;letter-spacing:1.5px;color:var(--purple);text-transform:uppercase;font-weight:700;margin:14px 0 8px">Renda Variável</div>
     <div class="fr2">
       <div class="field"><label>FIIs</label><input type="number" id="pFii" placeholder="0,00" inputmode="decimal"></div>
@@ -918,6 +921,11 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
       <div class="field"><label>ETFs</label><input type="number" id="pEtf" placeholder="0,00" inputmode="decimal"></div>
       <div class="field"><label>Internacional</label><input type="number" id="pIntl" placeholder="0,00" inputmode="decimal"></div>
     </div>
+    <div class="fr2">
+      <div class="field"><label>Stocks</label><input type="number" id="pStocks" placeholder="0,00" inputmode="decimal"></div>
+      <div class="field"><label>ETFs Internacionais</label><input type="number" id="pEtfIntl" placeholder="0,00" inputmode="decimal"></div>
+    </div>
+    <div class="field"><label>Criptomoedas</label><input type="number" id="pCripto" placeholder="0,00" inputmode="decimal"></div>
     <div class="field"><label>Observação (opcional)</label><input type="text" id="pObs" placeholder="Ex: aporte mensal, rebalanceamento..."></div>
     <input type="hidden" id="pEditId">
     <div class="m-actions">
@@ -1845,8 +1853,8 @@ async function sbSavePatrimonio(){
   }catch(e){}
 }
 function _patriTotais(p){
-  const rf=(p.cdb||0)+(p.lci||0)+(p.tesouro||0);
-  const rv=(p.fii||0)+(p.acoes||0)+(p.etf||0)+(p.intl||0);
+  const rf=(p.cdb||0)+(p.lci||0)+(p.tesouro||0)+(p.outrasRf||0);
+  const rv=(p.fii||0)+(p.acoes||0)+(p.etf||0)+(p.intl||0)+(p.stocks||0)+(p.etfIntl||0)+(p.cripto||0);
   return {rf,rv,total:rf+rv};
 }
 function renderPatrimonio(){
@@ -1870,8 +1878,8 @@ function renderPatrimonio(){
   const pctRV=100-pctRF;
   const distMeta=Math.abs(pctRV-PATRI_META_RV);
 
-  const subRF=[{l:'CDB',v:last.cdb||0},{l:'LCI/LCA',v:last.lci||0},{l:'Tesouro Direto',v:last.tesouro||0}];
-  const subRV=[{l:'FIIs',v:last.fii||0},{l:'Ações',v:last.acoes||0},{l:'ETFs',v:last.etf||0},{l:'Internacional',v:last.intl||0}];
+  const subRF=[{l:'CDB',v:last.cdb||0},{l:'LCI/LCA',v:last.lci||0},{l:'Tesouro Direto',v:last.tesouro||0},{l:'Outras RF',v:last.outrasRf||0}];
+  const subRV=[{l:'FIIs',v:last.fii||0},{l:'Ações',v:last.acoes||0},{l:'ETFs',v:last.etf||0},{l:'Internacional',v:last.intl||0},{l:'Stocks',v:last.stocks||0},{l:'ETFs Internacionais',v:last.etfIntl||0},{l:'Criptomoedas',v:last.cripto||0}];
 
   const histHtml=sorted.map((p,idx)=>{
     const t=_patriTotais(p);
@@ -1936,10 +1944,14 @@ function openPatriModal(editId=null){
   document.getElementById('pCdb').value=base?.cdb||'';
   document.getElementById('pLci').value=base?.lci||'';
   document.getElementById('pTesouro').value=base?.tesouro||'';
+  document.getElementById('pOutrasRf').value=base?.outrasRf||'';
   document.getElementById('pFii').value=base?.fii||'';
   document.getElementById('pAcoes').value=base?.acoes||'';
   document.getElementById('pEtf').value=base?.etf||'';
   document.getElementById('pIntl').value=base?.intl||'';
+  document.getElementById('pStocks').value=base?.stocks||'';
+  document.getElementById('pEtfIntl').value=base?.etfIntl||'';
+  document.getElementById('pCripto').value=base?.cripto||'';
   document.getElementById('pObs').value=editId&&base?(base.obs||''):'';
   document.getElementById('mbgPatri').classList.add('open');
 }
@@ -1955,10 +1967,14 @@ function salvarPatrimonio(){
     cdb:parseFloat(document.getElementById('pCdb').value)||0,
     lci:parseFloat(document.getElementById('pLci').value)||0,
     tesouro:parseFloat(document.getElementById('pTesouro').value)||0,
+    outrasRf:parseFloat(document.getElementById('pOutrasRf').value)||0,
     fii:parseFloat(document.getElementById('pFii').value)||0,
     acoes:parseFloat(document.getElementById('pAcoes').value)||0,
     etf:parseFloat(document.getElementById('pEtf').value)||0,
     intl:parseFloat(document.getElementById('pIntl').value)||0,
+    stocks:parseFloat(document.getElementById('pStocks').value)||0,
+    etfIntl:parseFloat(document.getElementById('pEtfIntl').value)||0,
+    cripto:parseFloat(document.getElementById('pCripto').value)||0,
     obs:document.getElementById('pObs').value.trim()
   };
   if(editId){patrimonio=patrimonio.map(p=>p.id===editId?reg:p);}
