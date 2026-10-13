@@ -433,6 +433,35 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
 
 /* ── V3.2 — INVESTIMENTOS ──────────────────────────────── */
 .inv-projecao{background:var(--pbg);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:11px;color:var(--purple);font-weight:600;line-height:1.5}
+
+/* ── V3.3 — ALOCAÇÃO DE PATRIMÔNIO ─────────────────────── */
+.patri-card{background:var(--bg2);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.patri-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.patri-total{font-size:22px;font-weight:800;font-family:'Manrope',sans-serif;letter-spacing:-.6px;color:var(--t)}
+.patri-total-sub{font-size:10px;color:var(--t3);font-weight:600;margin-top:2px}
+.patri-add-btn{background:var(--blue);border:none;border-radius:var(--rs);padding:8px 14px;font-size:11px;font-weight:700;color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap}
+.patri-gauge{height:14px;border-radius:7px;overflow:hidden;display:flex;background:var(--bg3);margin-bottom:6px}
+.patri-gauge-rf{background:var(--blue);height:100%;transition:width .5s}
+.patri-gauge-rv{background:var(--purple);height:100%;transition:width .5s}
+.patri-legend{display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:4px}
+.patri-legend .rf{color:var(--blue)}
+.patri-legend .rv{color:var(--purple)}
+.patri-meta-note{font-size:10px;color:var(--t3);text-align:center;font-weight:500;margin-top:2px}
+.patri-sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid var(--b)}
+.patri-sub-col-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.patri-sub-col-title.rf{color:var(--blue)}
+.patri-sub-col-title.rv{color:var(--purple)}
+.patri-sub-row{display:flex;justify-content:space-between;font-size:11px;padding:4px 0;color:var(--t2)}
+.patri-sub-row b{color:var(--t);font-family:'Manrope',sans-serif;font-weight:700}
+.patri-hist-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--b)}
+.patri-hist-item:last-child{border-bottom:none}
+.patri-hist-date{font-size:12px;font-weight:700;color:var(--t)}
+.patri-hist-pct{font-size:10px;color:var(--t3);margin-top:1px}
+.patri-hist-val{font-size:12px;font-weight:700;font-family:'Manrope',sans-serif;color:var(--t)}
+.patri-hist-delta{font-size:10px;font-weight:700;margin-top:1px;text-align:right}
+.patri-hist-delta.up{color:var(--green)}
+.patri-hist-delta.down{color:var(--red)}
+.patri-empty-note{font-size:11px;color:var(--t3);text-align:center;padding:20px 0;line-height:1.6}
 </style>
 </head>
 <body>
@@ -668,6 +697,10 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
     </div>
   </div>
   <div class="scroll">
+    <div class="sec">
+      <div class="slabel">alocação de patrimônio</div>
+      <div id="patriEl"></div>
+    </div>
     <div class="sec"><div id="metasEl"></div></div>
   </div>
 </div>
@@ -864,6 +897,85 @@ body.dark .mbg{background:rgba(0,0,0,0.8)}
 
 <div class="toast" id="toast"></div>
 
+<!-- MODAL PATRIMÔNIO (alocação RF/RV) -->
+<div class="mbg" id="mbgPatri" onclick="closePatriBg(event)">
+  <div class="modal">
+    <div class="m-handle"></div>
+    <div class="m-title" id="patriModalTitle">Atualizar Alocação</div>
+    <div class="field"><label>Data do registro</label><input type="date" id="pData"></div>
+    <div style="font-size:10px;letter-spacing:1.5px;color:var(--blue);text-transform:uppercase;font-weight:700;margin:10px 0 8px">Renda Fixa</div>
+    <div class="fr2">
+      <div class="field"><label>CDB</label><input type="number" id="pCdb" placeholder="0,00" inputmode="decimal"></div>
+      <div class="field"><label>LCI / LCA</label><input type="number" id="pLci" placeholder="0,00" inputmode="decimal"></div>
+    </div>
+    <div class="field"><label>Tesouro Direto</label><input type="number" id="pTesouro" placeholder="0,00" inputmode="decimal"></div>
+    <div style="font-size:10px;letter-spacing:1.5px;color:var(--purple);text-transform:uppercase;font-weight:700;margin:14px 0 8px">Renda Variável</div>
+    <div class="fr2">
+      <div class="field"><label>FIIs</label><input type="number" id="pFii" placeholder="0,00" inputmode="decimal"></div>
+      <div class="field"><label>Ações</label><input type="number" id="pAcoes" placeholder="0,00" inputmode="decimal"></div>
+    </div>
+    <div class="fr2">
+      <div class="field"><label>ETFs</label><input type="number" id="pEtf" placeholder="0,00" inputmode="decimal"></div>
+      <div class="field"><label>Internacional</label><input type="number" id="pIntl" placeholder="0,00" inputmode="decimal"></div>
+    </div>
+    <div class="field"><label>Observação (opcional)</label><input type="text" id="pObs" placeholder="Ex: aporte mensal, rebalanceamento..."></div>
+    <input type="hidden" id="pEditId">
+    <div class="m-actions">
+      <button class="btn-c" onclick="closePatriModal()">Cancelar</button>
+      <button class="btn-s" onclick="salvarPatrimonio()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL META RF/RV -->
+<div class="mbg" id="mbgMetaRV" onclick="if(event.target===this)closeMetaRVModal()">
+  <div class="modal">
+    <div class="m-handle"></div>
+    <div class="m-title">Ajustar Meta de Alocação</div>
+    <div style="font-size:12px;color:var(--t2);margin-bottom:16px;line-height:1.6">
+      Defina o percentual alvo de <b style="color:var(--purple)">Renda Variável</b> na sua carteira. O restante será considerado <b style="color:var(--blue)">Renda Fixa</b>.
+    </div>
+    <div style="background:var(--bg3);border-radius:var(--r);padding:16px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:700;color:var(--blue)">RF <span id="metaRFLabel">50</span>%</span>
+        <span style="font-size:13px;font-weight:700;color:var(--purple)">RV <span id="metaRVLabel">50</span>%</span>
+      </div>
+      <!-- barra visual RF/RV -->
+      <div style="height:14px;border-radius:7px;overflow:hidden;display:flex;background:var(--bg4);margin-bottom:14px">
+        <div id="metaGaugeRF" style="background:var(--blue);height:100%;transition:width .2s"></div>
+        <div id="metaGaugeRV" style="background:var(--purple);height:100%;transition:width .2s"></div>
+      </div>
+      <!-- slider -->
+      <div style="margin-bottom:4px">
+        <label style="font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.5px">% RENDA VARIÁVEL</label>
+        <input type="range" id="metaRVSlider" min="0" max="100" step="5" value="50"
+          oninput="onMetaRVSlider(this.value)"
+          style="width:100%;margin-top:6px;accent-color:var(--purple)">
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);font-weight:500">
+        <span>0% RV</span><span>25%</span><span>50%</span><span>75%</span><span>100% RV</span>
+      </div>
+    </div>
+    <!-- presets rápidos -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:10px;letter-spacing:1.5px;color:var(--t3);text-transform:uppercase;font-weight:700;margin-bottom:8px">Presets rápidos</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button onclick="setMetaPreset(20)" class="fbtn" id="mpreset20">RF80/RV20</button>
+        <button onclick="setMetaPreset(30)" class="fbtn" id="mpreset30">RF70/RV30</button>
+        <button onclick="setMetaPreset(40)" class="fbtn" id="mpreset40">RF60/RV40</button>
+        <button onclick="setMetaPreset(50)" class="fbtn" id="mpreset50">RF50/RV50</button>
+        <button onclick="setMetaPreset(60)" class="fbtn" id="mpreset60">RF40/RV60</button>
+        <button onclick="setMetaPreset(70)" class="fbtn" id="mpreset70">RF30/RV70</button>
+        <button onclick="setMetaPreset(80)" class="fbtn" id="mpreset80">RF20/RV80</button>
+      </div>
+    </div>
+    <div class="m-actions">
+      <button class="btn-c" onclick="closeMetaRVModal()">Cancelar</button>
+      <button class="btn-s" onclick="confirmarMetaRV()">Salvar Meta</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL APORTE -->
 <div class="mbg" id="mbgAporte" onclick="if(event.target===this)closeAporteModal()">
   <div class="modal">
@@ -1018,7 +1130,7 @@ function render(){
   const bv=document.getElementById('balVal');
   bv.textContent=fmt(bal);bv.className='hval '+(bal>=0?'pos':'neg');
   document.getElementById('balSub').textContent=ent>0?`${Math.round(sai/ent*100)}% comprometido`:'';
-  renderChart(items);renderList(items);renderMetas();renderHist();renderSemana();renderCfg();
+  renderChart(items);renderList(items);renderMetas();renderPatrimonio();renderHist();renderSemana();renderCfg();
 }
 
 // ── CHART ──────────────────────────────────────────────────
@@ -1721,6 +1833,182 @@ function persistMetasOrder(){
 }
 
 
+// ── ALOCAÇÃO DE PATRIMÔNIO (RF x RV) ────────────────────────
+function savePatrimonio(){
+  localStorage.setItem('fp_patrimonio',JSON.stringify(patrimonio));
+  sbSavePatrimonio();
+}
+async function sbSavePatrimonio(){
+  try{
+    await fetch(sbUrl('fp_configs'),{method:'POST',headers:{...sbH(),'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({id:'patrimonio_'+SB_UID,user_id:SB_UID,chave:'patrimonio',dados:patrimonio})});
+  }catch(e){}
+}
+function _patriTotais(p){
+  const rf=(p.cdb||0)+(p.lci||0)+(p.tesouro||0);
+  const rv=(p.fii||0)+(p.acoes||0)+(p.etf||0)+(p.intl||0);
+  return {rf,rv,total:rf+rv};
+}
+function renderPatrimonio(){
+  const el=document.getElementById('patriEl');
+  if(!el)return;
+  if(!patrimonio.length){
+    el.innerHTML=`<div class="patri-card">
+      <div class="patri-empty-note">Nenhum registro ainda. Cadastre sua posição atual de Renda Fixa e Renda Variável pra começar a acompanhar a evolução mês a mês.</div>
+      <button class="patri-add-btn" style="width:100%;margin-top:8px" onclick="openPatriModal()">+ Registrar posição atual</button>
+      <div style="text-align:center;margin-top:10px">
+        <span style="font-size:11px;color:var(--t3)">Meta atual: ${100-PATRI_META_RV}% RF / ${PATRI_META_RV}% RV · </span>
+        <button onclick="openMetaRVModal()" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--blue);font-weight:700">ajustar meta</button>
+      </div>
+    </div>`;
+    return;
+  }
+  const sorted=[...patrimonio].sort((a,b)=>new Date(b.data)-new Date(a.data));
+  const last=sorted[0];
+  const {rf,rv,total}=_patriTotais(last);
+  const pctRF=total>0?Math.round(rf/total*100):0;
+  const pctRV=100-pctRF;
+  const distMeta=Math.abs(pctRV-PATRI_META_RV);
+
+  const subRF=[{l:'CDB',v:last.cdb||0},{l:'LCI/LCA',v:last.lci||0},{l:'Tesouro Direto',v:last.tesouro||0}];
+  const subRV=[{l:'FIIs',v:last.fii||0},{l:'Ações',v:last.acoes||0},{l:'ETFs',v:last.etf||0},{l:'Internacional',v:last.intl||0}];
+
+  const histHtml=sorted.map((p,idx)=>{
+    const t=_patriTotais(p);
+    const pRV=t.total>0?Math.round(t.rv/t.total*100):0;
+    let deltaHtml='';
+    if(idx<sorted.length-1){
+      const prevT=_patriTotais(sorted[idx+1]);
+      const d=t.total-prevT.total;
+      deltaHtml=`<div class="patri-hist-delta ${d>=0?'up':'down'}">${d>=0?'+':''}${fmt(d)}</div>`;
+    }
+    return `<div class="patri-hist-item">
+      <div>
+        <div class="patri-hist-date">${fmtD(p.data)}${p.obs?` <span style="font-weight:500;color:var(--t3);font-size:10px">· ${p.obs}</span>`:''}</div>
+        <div class="patri-hist-pct">RF ${100-pRV}% · RV ${pRV}%</div>
+      </div>
+      <div style="text-align:right;display:flex;align-items:center;gap:8px">
+        <div>
+          <div class="patri-hist-val">${fmt(t.total)}</div>
+          ${deltaHtml}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <button onclick="openPatriModal('${p.id}')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px" title="Editar">✏️</button>
+          <button onclick="deletarPatrimonio('${p.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px" title="Excluir">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`<div class="patri-card">
+    <div class="patri-top">
+      <div>
+        <div class="patri-total">${fmt(total)}</div>
+        <div class="patri-total-sub">posição em ${fmtD(last.data)}</div>
+      </div>
+      <button class="patri-add-btn" onclick="openPatriModal()">+ Atualizar</button>
+    </div>
+    <div class="patri-legend"><span class="rf">Renda Fixa · ${fmt(rf)} (${pctRF}%)</span><span class="rv">Renda Variável · ${fmt(rv)} (${pctRV}%)</span></div>
+    <div class="patri-gauge"><div class="patri-gauge-rf" style="width:${pctRF}%"></div><div class="patri-gauge-rv" style="width:${pctRV}%"></div></div>
+    <div class="patri-meta-note" style="display:flex;align-items:center;justify-content:center;gap:6px">
+      <span>meta ${100-PATRI_META_RV}% RF / ${PATRI_META_RV}% RV ${distMeta<=2?'· ✅ dentro da meta':`· ${distMeta}pp fora da meta`}</span>
+      <button onclick="openMetaRVModal()" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--blue);font-weight:700;padding:1px 5px;border-radius:6px;border:1px solid var(--bbg)">ajustar</button>
+    </div>
+    <div class="patri-sub-grid">
+      <div>
+        <div class="patri-sub-col-title rf">Renda Fixa</div>
+        ${subRF.map(s=>`<div class="patri-sub-row"><span>${s.l}</span><b>${fmt(s.v)}</b></div>`).join('')}
+      </div>
+      <div>
+        <div class="patri-sub-col-title rv">Renda Variável</div>
+        ${subRV.map(s=>`<div class="patri-sub-row"><span>${s.l}</span><b>${fmt(s.v)}</b></div>`).join('')}
+      </div>
+    </div>
+  </div>
+  ${sorted.length>1?`<div class="patri-card"><div class="an-card h4" style="font-size:11px;letter-spacing:1.5px;color:var(--t3);text-transform:uppercase;font-weight:700;margin-bottom:8px">Histórico de registros</div>${histHtml}</div>`:''}`;
+}
+function openPatriModal(editId=null){
+  document.getElementById('pEditId').value=editId||'';
+  const sorted=[...patrimonio].sort((a,b)=>new Date(b.data)-new Date(a.data));
+  const base=editId?patrimonio.find(p=>p.id===editId):sorted[0]; // pré-preenche com o último registro por conveniência
+  document.getElementById('patriModalTitle').textContent=editId?'Editar Registro':'Registrar Posição Atual';
+  document.getElementById('pData').value=editId&&base?base.data:new Date().toISOString().split('T')[0];
+  document.getElementById('pCdb').value=base?.cdb||'';
+  document.getElementById('pLci').value=base?.lci||'';
+  document.getElementById('pTesouro').value=base?.tesouro||'';
+  document.getElementById('pFii').value=base?.fii||'';
+  document.getElementById('pAcoes').value=base?.acoes||'';
+  document.getElementById('pEtf').value=base?.etf||'';
+  document.getElementById('pIntl').value=base?.intl||'';
+  document.getElementById('pObs').value=editId&&base?(base.obs||''):'';
+  document.getElementById('mbgPatri').classList.add('open');
+}
+function closePatriModal(){document.getElementById('mbgPatri').classList.remove('open');}
+function closePatriBg(e){if(e.target===document.getElementById('mbgPatri'))closePatriModal();}
+function salvarPatrimonio(){
+  const data_p=document.getElementById('pData').value;
+  if(!data_p){showToast('Informe a data');return;}
+  const editId=document.getElementById('pEditId').value;
+  const reg={
+    id:editId||'pt'+Date.now(),
+    data:data_p,
+    cdb:parseFloat(document.getElementById('pCdb').value)||0,
+    lci:parseFloat(document.getElementById('pLci').value)||0,
+    tesouro:parseFloat(document.getElementById('pTesouro').value)||0,
+    fii:parseFloat(document.getElementById('pFii').value)||0,
+    acoes:parseFloat(document.getElementById('pAcoes').value)||0,
+    etf:parseFloat(document.getElementById('pEtf').value)||0,
+    intl:parseFloat(document.getElementById('pIntl').value)||0,
+    obs:document.getElementById('pObs').value.trim()
+  };
+  if(editId){patrimonio=patrimonio.map(p=>p.id===editId?reg:p);}
+  else{patrimonio.push(reg);}
+  savePatrimonio();
+  closePatriModal();
+  renderPatrimonio();
+  showToast(editId?'Registro atualizado!':'Posição registrada!');
+}
+function deletarPatrimonio(id){
+  if(!confirm('Excluir este registro do histórico?'))return;
+  patrimonio=patrimonio.filter(p=>p.id!==id);
+  savePatrimonio();
+  renderPatrimonio();
+  showToast('Registro excluído');
+}
+
+// ── META RF/RV ─────────────────────────────────────────────
+function openMetaRVModal(){
+  const val=PATRI_META_RV;
+  document.getElementById('metaRVSlider').value=val;
+  _updateMetaRVUI(val);
+  document.getElementById('mbgMetaRV').classList.add('open');
+}
+function closeMetaRVModal(){document.getElementById('mbgMetaRV').classList.remove('open');}
+function onMetaRVSlider(val){_updateMetaRVUI(parseInt(val,10));}
+function setMetaPreset(rv){
+  document.getElementById('metaRVSlider').value=rv;
+  _updateMetaRVUI(rv);
+}
+function _updateMetaRVUI(rv){
+  const rf=100-rv;
+  document.getElementById('metaRVLabel').textContent=rv;
+  document.getElementById('metaRFLabel').textContent=rf;
+  document.getElementById('metaGaugeRF').style.width=rf+'%';
+  document.getElementById('metaGaugeRV').style.width=rv+'%';
+  // destaca o preset ativo
+  [20,30,40,50,60,70,80].forEach(p=>{
+    const btn=document.getElementById('mpreset'+p);
+    if(btn)btn.classList.toggle('active',p===rv);
+  });
+}
+function confirmarMetaRV(){
+  const val=parseInt(document.getElementById('metaRVSlider').value,10);
+  saveMetaRV(val);
+  closeMetaRVModal();
+  renderPatrimonio();
+  showToast(`Meta atualizada: RF ${100-val}% / RV ${val}%`);
+}
+
 // ── CONFIG ─────────────────────────────────────────────────
 function renderCfg(){
   document.getElementById('pgtoList').innerHTML=['C6','Inter','XP','TAP','Nubank'].map(p=>`<span class="pill">${p}</span>`).join('');
@@ -2304,6 +2592,18 @@ function clearAll(){if(!confirm('Apagar tudo?'))return;data=[];metas=[];recs=[];
 let grupos=JSON.parse(localStorage.getItem('fp_grupos')||'[]');
 let aportes=JSON.parse(localStorage.getItem('fp_aportes')||'[]');
 let pgtos_pessoas=JSON.parse(localStorage.getItem('fp_pgtos_pessoas')||'[]');
+let patrimonio=JSON.parse(localStorage.getItem('fp_patrimonio')||'[]');
+let PATRI_META_RV=parseInt(localStorage.getItem('fp_meta_rv')||'50',10); // meta de alocação RF/RV — configurável pelo usuário
+
+function saveMetaRV(val){
+  PATRI_META_RV=val;
+  localStorage.setItem('fp_meta_rv',String(val));
+  // persiste no Supabase via fp_configs (schema v3.3)
+  if(SB_TOKEN&&SB_UID){
+    try{fetch(sbUrl('fp_configs'),{method:'POST',headers:{...sbH(),'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({id:'meta_rv_'+SB_UID,user_id:SB_UID,chave:'meta_rv',dados:{rv:val}})});}catch(e){}
+  }
+}
 let pessoasTab='pendente';
 let gTempPessoas=[];
 
@@ -3122,6 +3422,10 @@ async function syncFromServer(){
         if(ap&&ap.dados){aportes=ap.dados;localStorage.setItem('fp_aportes',JSON.stringify(aportes));}
         const pg=rows.find(r=>r.chave==='pgtos_pessoas');
         if(pg&&pg.dados){pgtos_pessoas=pg.dados;localStorage.setItem('fp_pgtos_pessoas',JSON.stringify(pgtos_pessoas));}
+        const pt=rows.find(r=>r.chave==='patrimonio');
+        if(pt&&pt.dados){patrimonio=pt.dados;localStorage.setItem('fp_patrimonio',JSON.stringify(patrimonio));}
+        const mr=rows.find(r=>r.chave==='meta_rv');
+        if(mr&&mr.dados&&mr.dados.rv!=null){PATRI_META_RV=parseInt(mr.dados.rv,10);localStorage.setItem('fp_meta_rv',String(PATRI_META_RV));}
       }
       const rgg=await fetch(sbUrl('fp_grupos',`?user_id=eq.${SB_UID}&select=*`),{headers:sbH()});
       if(rgg.ok){
@@ -3240,6 +3544,7 @@ async function doLogout(){
 grupos=JSON.parse(localStorage.getItem('fp_grupos')||'[]');
 pgtos_pessoas=JSON.parse(localStorage.getItem('fp_pgtos_pessoas')||'[]');
 aportes=JSON.parse(localStorage.getItem('fp_aportes')||'[]');
+patrimonio=JSON.parse(localStorage.getItem('fp_patrimonio')||'[]');
 const savedTheme=localStorage.getItem('fp_theme');
 if(savedTheme==='dark'){document.body.classList.add('dark');const tb=document.getElementById('themeBtn');if(tb)tb.textContent='☀️';}
 
