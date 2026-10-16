@@ -121,6 +121,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Plus Jaka
 .tag{background:var(--bg3);border-radius:6px;padding:2px 7px;font-size:10px;color:var(--t2);font-weight:600;white-space:nowrap;flex-shrink:0}
 .tag.fat{background:var(--abg);color:var(--amber)}
 .tag.rec{background:var(--bbg);color:var(--blue)}
+.tag.parc{background:var(--pbg);color:var(--purple)}
 .lright{text-align:right;flex-shrink:0}
 .lval{font-size:13px;font-weight:700;font-family:'Manrope',sans-serif;letter-spacing:-.3px}
 .lval.e{color:var(--green)}
@@ -1109,6 +1110,17 @@ let pRefM=new Date().getMonth(),pRefY=new Date().getFullYear();
 
 const fmt=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const fmtD=s=>{if(!s)return'';const p=s.split('-');return`${p[2]}/${p[1]}`};
+// parcela = posição da fatura do lançamento dentro do período da série recorrente (início..fim)
+// ex: início Out/26, fim Dez/26 → Out=1/3, Nov=2/3, Dez=3/3. Sem mês final (Indefinido) = não é parcelado.
+function parcInfo(i){
+  if(!i||!i.recId)return null;
+  const r=recs.find(x=>x.id===i.recId);
+  if(!r||r.fimM==null||r.fimY==null)return null;
+  const t=(r.fimY-r.iniY)*12+(r.fimM-r.iniM)+1;
+  const a=(i.fatY-r.iniY)*12+(i.fatM-r.iniM)+1;
+  return(t>1&&a>=1&&a<=t)?{a,t}:null;
+}
+const parcLbl=i=>{const p=parcInfo(i);return p?`${p.a}/${p.t}`:'';};
 const mStr=(m,y)=>`${MS[m].slice(0,3)} ${y}`;
 const escJs=s=>String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 const getKey=(m,y)=>`${m}-${y}`;
@@ -1208,7 +1220,7 @@ function renderList(items){
           ${item.pgto?`<span class="tag">${CARD_NAMES[item.pgto]||item.pgto}</span>`:''}
           ${item.resp?`<span class="tag">${item.resp}</span>`:''}
           ${fd?`<span class="tag fat">fat.${MS[item.fatM].slice(0,3)}</span>`:''}
-          ${item.recId?`<span class="tag rec">↺</span>`:''}
+          ${parcLbl(item)?`<span class="tag parc">${parcLbl(item)}</span>`:`${item.recId?'<span class="tag rec">↺</span>':''}`}
         </div>
       </div>
       <div class="lright" style="display:flex;align-items:center;gap:8px">
@@ -2044,7 +2056,7 @@ function renderRecList(){
   grupos.forEach(g=>g.pessoas.forEach(p=>{pessoaNomesRec[p.id]=p.nome;}));
   el.innerHTML=recs.map(r=>{
     const ini=`${MS[r.iniM]} ${r.iniY}`;
-    const fim=r.fimM?`${MS[r.fimM]} ${r.fimY}`:'Indefinido';
+    const fim=r.fimM!=null?`${MS[r.fimM]} ${r.fimY}`:'Indefinido';
     const tipo=r.tpl.tipo==='entrada'?'Entrada':'Saída';
     const cor=r.tpl.tipo==='entrada'?'var(--green)':'var(--red)';
     const pessoaNome=r.tpl.pessoaId?pessoaNomesRec[r.tpl.pessoaId]:null;
@@ -2052,7 +2064,7 @@ function renderRecList(){
       <div class="rec-card-head">
         <div>
           <div class="rec-card-desc">${r.tpl.desc}${pessoaNome?` <span style="font-size:10px;background:var(--bbg);color:var(--blue);border-radius:4px;padding:1px 6px;font-weight:700">${pessoaNome}</span>`:''}</div>
-          <div class="rec-card-meta">${r.tpl.cat} · ${CARD_NAMES[r.tpl.pgto]||r.tpl.pgto||''} · ${r.tpl.resp||''} · ${ini} → ${fim}</div>
+          <div class="rec-card-meta">${r.tpl.cat} · ${CARD_NAMES[r.tpl.pgto]||r.tpl.pgto||''} · ${r.tpl.resp||''} · ${ini} → ${fim}${r.fimM!=null?` · ${(r.fimY-r.iniY)*12+r.fimM-r.iniM+1}x`:''}</div>
         </div>
         <div style="text-align:right">
           <div class="rec-card-val" style="color:${cor}">${tipo==='Entrada'?'+':'-'}${fmt(r.tpl.valor)}</div>
@@ -2092,7 +2104,7 @@ function applyRecs(){
   let ch=false;
   recs.forEach(r=>{
     const ok=(curY>r.iniY||(curY===r.iniY&&curM>=r.iniM));
-    const okFim=!r.fimM||(curY<r.fimY||(curY===r.fimY&&curM<=r.fimM));
+    const okFim=r.fimM==null||(curY<r.fimY||(curY===r.fimY&&curM<=r.fimM));
     if(!ok||!okFim)return;
     if(!data.find(d=>d.recId===r.id&&d.fatM===curM&&d.fatY===curY)){
       data.push({...r.tpl,id:Date.now()+'_'+Math.random(),recId:r.id,fatM:curM,fatY:curY,lanM:curM,lanY:curY,dataLanc:`${curY}-${String(curM+1).padStart(2,'0')}-01`});
@@ -2203,7 +2215,7 @@ function editarRecorrente(recId){
   document.getElementById('fRecIni').innerHTML=mesOpts(rec.iniM,rec.iniY);
   const fimOpts=`<option value="">Indefinido</option>`+mesOpts(null,null);
   document.getElementById('fRecFim').innerHTML=fimOpts;
-  if(rec.fimM)document.getElementById('fRecFim').value=`${rec.fimM}-${rec.fimY}`;
+  if(rec.fimM!=null)document.getElementById('fRecFim').value=`${rec.fimM}-${rec.fimY}`;
   document.getElementById('mbg').classList.add('open');
 }
 
@@ -2772,7 +2784,7 @@ function renderPendenciasHtml(pendencias, pessoaId, isGrupoId=null){
       ${p.gastos.map(g=>`
         <div class="pessoa-gasto-item" style="padding:5px 0">
           <div><div class="pessoa-gasto-desc">${g.desc}</div>
-          <div class="pessoa-gasto-meta">${g.cat} · ${fmtD(g.dataLanc)}</div></div>
+          <div class="pessoa-gasto-meta">${g.cat} · ${fmtD(g.dataLanc)}${parcLbl(g)?` · parcela ${parcLbl(g)}`:''}</div></div>
           <div class="pessoa-gasto-val">${fmt(g.valor)}</div>
         </div>`).join('')}
       ${p.pgtos.length?`<div style="margin-top:6px;background:var(--gbg);border-radius:6px;padding:6px 10px">
@@ -2945,7 +2957,7 @@ function getCobrancaData(){
 function textoCobranca(){
   const d=getCobrancaData();
   if(!d.itens.length)return `Oi ${d.nome}! Nenhum gasto lançado na fatura de ${d.mesLabel}.`;
-  const linhas=d.itens.map((it,i)=>`${i+1}. ${it.desc} — ${fmtD(it.dataLanc)} — ${fmt(it.valor)}`).join('\n');
+  const linhas=d.itens.map((it,i)=>`${i+1}. ${it.desc}${parcLbl(it)?` (parcela ${parcLbl(it)})`:''} — ${fmtD(it.dataLanc)} — ${fmt(it.valor)}`).join('\n');
   return `*Cobrança — ${d.mesLabel}*\nPara: ${d.nome}\n\n${linhas}\n\n*Total: ${fmt(d.total)}*`;
 }
 
@@ -3037,7 +3049,7 @@ async function gerarImagemCobranca(){
       ctx.textBaseline='middle';
       ctx.fillStyle='#0F1923';
       ctx.font='700 14px "Plus Jakarta Sans", sans-serif';
-      let desc=it.desc||'';
+      let desc=it.desc||'';const pl=parcLbl(it)?` (${parcLbl(it)})`:'';if(desc.length>36-pl.length)desc=desc.slice(0,35-pl.length)+'…';desc+=pl;
       if(desc.length>36)desc=desc.slice(0,35)+'…';
       ctx.fillText(desc,pad+22,midY-8);
       ctx.fillStyle='#9AA5B4';
@@ -3269,7 +3281,7 @@ function renderCartoes(){
     return `<div class="cartao-item" id="li_${i.id}">
       <div style="flex:1;min-width:0;margin-right:8px">
         <div class="cartao-item-desc">${i.desc}${pessoaNome?` <span style="font-size:9px;background:var(--bbg);color:var(--blue);border-radius:4px;padding:1px 5px;font-weight:700">${pessoaNome}</span>`:''}</div>
-        <div class="cartao-item-cat">${i.cat} · ${fmtD(i.dataLanc)}</div>
+        <div class="cartao-item-cat">${i.cat} · ${fmtD(i.dataLanc)}${parcLbl(i)?` · parcela ${parcLbl(i)}`:''}</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
         <div class="cartao-item-val">${fmt(i.valor)}</div>
